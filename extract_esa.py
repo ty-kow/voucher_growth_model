@@ -57,7 +57,9 @@ def parse(text, legacy_sn=False):
     )
     # FY25+ reports: annualized scholarship total in the key points, and total
     # students directly after the "K-12 universal" row of Table 1.
-    cost = find(text, r"annualized\s+basis,?\s+is\s+" + NUM)
+    cost = find(text, r"annualized\s+basis,?\s+is\s+" + NUM) or find(
+        text, r"total\s+annual\s+scholarship\s+awards\s+for\s+students\s+enrolled\s+in\s+Quarter\s+\d\s+was\s+" + NUM
+    )
     total_sn = find(text, r"of\s+the\s+" + NUM + r"\s+ESA\s+students\s+with\s+a\s+disability")
     total = (
         find(text, r"K-12\W+universal\s+[\d,]+\s*\n\s*Total\s+" + NUM + r"\s*$")
@@ -121,10 +123,16 @@ def main_folder(folder, out_csv):
         m = re.search(r"FY(\d\d)Q(\d)", os.path.basename(p))
         return (int(m.group(1)), int(m.group(2)), m.group(0)) if m else (99, 9, p)
 
-    rows = []
+    by_quarter = {}
     for p in sorted(glob.glob(os.path.join(folder, "*.pdf")), key=quarter):
         q = quarter(p)[2]
-        rows.append({"Quarter": q, **parse(read_text(p), is_legacy(q))})
+        parsed = parse(read_text(p), is_legacy(q))
+        # Multiple PDFs for one quarter (e.g. "FY24Q1 SBE.pdf" + "FY24Q1.pdf"): fill blanks from each.
+        row = by_quarter.setdefault(q, {"Quarter": q})
+        for k, v in parsed.items():
+            if row.get(k) is None:
+                row[k] = v
+    rows = list(by_quarter.values())
     with open(out_csv, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
