@@ -31,19 +31,24 @@ def parse(text):
     text = re.sub(r"[ \t]+", " ", text)
 
     mean_voucher = (
-        find(text, r"average annual award amount[^$]*" + NUM)
+        find(text, r"average\s+annual\s+award\s+amount[^$]*" + NUM)
         or find(text, r"^\s*Average\s+" + NUM)
     )
     total = (
-        find(text, r"Total Active ESA Students(?: [\d,]+)*? " + NUM + r"[ \t]*$")
-        or find(text, r"there are " + NUM + r" (?:active )?students")
+        # Narrative sentence first: some reports add an "Exited" column after the active count.
+        find(text, r"there\s+(?:are|were)\s+" + NUM + r"\s+(?:active\s+)?students")
+        or find(text, r"Total Active ESA Students(?: [\d,]+)*? " + NUM + r"[ \t]*$")
         or find(text, r"^\s*Total(?: [\d,]+)*? " + NUM + r"\s*$")
     )
 
     # Eligibility rows: "<label> <count>" at the start of a line.
     def row_ml(label):
         # Multi-quarter tables list several columns; the last is the current quarter.
-        m = re.search(r"^\s*" + label + r"(?: [\d,]+)*? ([\d,]+)\s*$", text, re.IGNORECASE | re.MULTILINE)
+        # "Active Students Exited Students" tables put the active count first, exited last.
+        if re.search(r"Active Students Exited Students", text):
+            m = re.search(r"^\s*" + label + r" ([\d,]+) [\d,]+\s*$", text, re.IGNORECASE | re.MULTILINE)
+        else:
+            m = re.search(r"^\s*" + label + r"(?: [\d,]+)*? ([\d,]+)\s*$", text, re.IGNORECASE | re.MULTILINE)
         return clean(m.group(1)) if m else None
 
     dash = r"[—–-]"
