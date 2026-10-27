@@ -47,3 +47,18 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 - Filled `mean_voucher` for FY25+ is an implied average from reported cost, so cost and mean voucher are not independent for those quarters.
 - **FLAG: duplicate `total_k12_sn`.** FY23Q4 and FY24Q1 report the same value (10409). The duplicate does not follow the trend of the series. Likely cause: a reporting error by the agency, but this cannot be verified. The `total_sn` fills for FY23Q4 (11180) and FY24Q1 (11029) derive from these values (step 5) and inherit the uncertainty. Treat both quarters with caution in modelling.
 - Quarters before FY25Q1 vs. after use different cost sources, which matters for any model that uses cost as a target.
+
+## Model Building
+
+### Exploration
+
+**Question.** Which aspects drive enrolment and cost in the program?
+
+**Enrolment.**
+- First-order driver: incoming students (kindergarten) minus outgoing students (grade 12).
+- In practice more complicated. Students tend to leave the program before grade 9. This is a qualitative claim, not yet checked against data.
+
+**Cost.**
+- Special needs cost is driven in large part by autism, which carries the highest award value.
+
+**New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.
