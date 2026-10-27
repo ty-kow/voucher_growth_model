@@ -1,2 +1,9 @@
-__pycache__/
+﻿__pycache__/
+*.pyc
 .venv/
+.env
+.ipynb_checkpoints/
+data/processed/*
+outputs/*
+!data/processed/.gitkeep
+!outputs/.gitkeep
