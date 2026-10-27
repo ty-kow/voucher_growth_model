@@ -3,7 +3,5 @@
 .venv/
 .env
 .ipynb_checkpoints/
-data/processed/*
 outputs/*
-!data/processed/.gitkeep
 !outputs/.gitkeep

@@ -4,7 +4,8 @@ Forecast Arizona ESA (voucher) enrolment and program cost from quarterly state r
 
 ## Layout
 - `data/raw/voucher_reports/`: source PDFs (FY21Q2-FY26Q4), tracked in git
-- `data/processed/`, `outputs/`: generated, gitignored
+- `data/processed/`: generated, tracked in git (`voucher_metrics_raw.csv` extractor output, `voucher_metrics_clean.csv` cleaned; changes logged in `decisions.md`)
+- `outputs/`: generated, gitignored
 - `src/voucher_growth_model/extract_esa.py`: PDF to CSV extractor
 
 ## Commands
