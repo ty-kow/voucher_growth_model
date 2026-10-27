@@ -83,3 +83,20 @@ All remaining blank cells set to `N/A` (user instruction). Reason: data not avai
 |---|---|
 | total_mil_sn | 19 |
 | total_universal_sn | 13 |
+
+## Bring in grade-level data
+
+Decision: add grade-level enrolment data to the project. Explanation: enrolment is driven first by incoming (kindergarten) and outgoing (grade 12) students, and students tend to leave the program before grade 9 (qualitative claim, not yet checked against data). Grade-level counts are needed to test this and to model enrolment flows.
+
+All other modelling decisions (method, targets, cost structure) are deferred until the grade-level data has been explored. No changes to `data/processed/` files yet.
+
+## Grade-level data brought in
+
+Grade-level enrolment (`kinder`, `grade_1` to `grade_12`) extracted from all quarterly PDFs and added to `voucher_metrics_raw.csv` and `voucher_metrics_clean.csv`. Preschool was already present (`Preschool Count` / `total_pre`). No values imputed.
+
+- FY23Q4: the PDF has only a bar chart for total enrolment by grade; counts were read from the chart and accepted because preschool plus grades 1 to 12 sums to total enrolment (61,689).
+- All 23 quarters: preschool + `kinder` + `grade_1` to `grade_12` equals total enrolment.
+
+## FY25Q3 preschool: grade-level table used
+
+Flag: FY25Q3 preschool is 1,340 (grade-level table), not 1,346 (eligibility table). Grade-level table chosen for consistency with the other grade data; with it, preschool plus grades sums to total enrolment (87,602). The extractor now takes preschool from the grade-level table for all quarters; no other quarter changed. `total_pre` in `voucher_metrics_clean.csv` updated to 1340.

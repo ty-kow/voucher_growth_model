@@ -47,6 +47,27 @@ def is_legacy(label):
     return bool(m) and (int(m.group(1)), int(m.group(2))) <= (23, 3)
 
 
+GRADES = [("kinder", "Kindergarten")] + [
+    (f"grade_{n}", f"{n}{'th' if 10 <= n <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}")
+    for n in range(1, 13)
+]
+
+
+def chart_grades(text, total):
+    """Grade counts from a bar-chart-only report (FY23Q4 SBE), or all None.
+
+    The chart prints 14 bare numbers (preschool..12th) followed by the axis labels in the same order.
+    Accepted only when the labels follow in ascending order and the counts sum to total enrolment.
+    """
+    empty = {col: None for col, _ in GRADES}
+    for m in re.finditer(r"(?:^[\d,]+ ?\n){13}^[\d,]+ ?$", text, re.MULTILINE):
+        nums = [int(x.replace(",", "")) for x in m.group(0).split()]
+        after = text[m.end() : m.end() + 400]
+        if total and sum(nums) == int(total) and re.search(r"Preschool[^\n]*\nKindergarten\n1st\n", after):
+            return {col: str(n) for (col, _), n in zip(GRADES, nums[1:])}
+    return empty
+
+
 def parse(text, legacy_sn=False):
     text = re.sub(r"[ \t]+", " ", text)
 
@@ -70,25 +91,38 @@ def parse(text, legacy_sn=False):
     )
 
     # Eligibility rows: "<label> <count>" at the start of a line.
-    def row_ml(label):
+    def row_ml_in(t, label):
         # Multi-quarter tables list several columns; the last is the current quarter.
         # "Active Students Exited Students" tables put the active count first, exited last.
         if re.search(r"Active Students Exited Students", text):
-            m = re.search(r"^\s*" + label + r" ([\d,]+) [\d,]+\s*$", text, re.IGNORECASE | re.MULTILINE)
+            m = re.search(r"^\s*" + label + r" ([\d,]+) [\d,]+\s*$", t, re.IGNORECASE | re.MULTILINE)
         else:
-            m = re.search(r"^\s*" + label + r"(?: [\d,]+)*? ([\d,]+)\s*$", text, re.IGNORECASE | re.MULTILINE)
+            m = re.search(r"^\s*" + label + r"(?: [\d,]+)*? ([\d,]+)\s*$", t, re.IGNORECASE | re.MULTILINE)
         return clean(m.group(1)) if m else None
+
+    def row_ml(label):
+        return row_ml_in(text, label)
 
     dash = r"\s*[—–-]?\s*"
     special = row_ml(r"Special Needs") or row_ml(r"Disabilities") or row_ml(r"K-12" + dash + r"Disability")
     mil_sn = row_ml(r"Military with (?:Special Needs|Disabilities)")
     preschool = row_ml(r"Preschool(?:" + dash + r"disability)?")
+    # Prefer the grade-level table's preschool row; the eligibility table can differ slightly (FY25Q3).
+    for h in re.finditer(r"^\s*Grade Level\b.*$", text, re.IGNORECASE | re.MULTILINE):
+        grade_pre = row_ml_in(text[h.end() : h.end() + 200], r"Preschool(?:" + dash + r"disability)?")
+        if grade_pre:
+            preschool = grade_pre
+            break
     universal = row_ml(r"Universal") or row_ml(r"K-12" + dash + r"Universal")
     universal_sn = row_ml(r"Universal (?:w/|with) (?:Special Needs|Disabilities)")
 
     if legacy_sn:
         # FY21Q2-FY23Q3 reports list a single disability row covering all students.
         total_sn, special = special, None
+
+    grades = {col: row_ml(label) for col, label in GRADES}
+    if all(v is None for v in grades.values()):
+        grades = chart_grades(text, total)
 
     return {
         "Mean Voucher": fmt(mean_voucher, money=True),
@@ -100,6 +134,7 @@ def parse(text, legacy_sn=False):
         "Military with Disability/SN Count": fmt(mil_sn),
         "Preschool Count": fmt(preschool),
         "Universal w/ Disability/SN Count": fmt(universal_sn),
+        **{k: fmt(v) for k, v in grades.items()},
     }
 
 
