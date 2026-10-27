@@ -46,6 +46,7 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 - Filled `total_cost` for FY21Q2-FY24Q1 is an estimate (enrolment times mean voucher), not a reported figure. Reported cost uses an annualized basis; the identity is approximate.
 - Filled `mean_voucher` for FY25+ is an implied average from reported cost, so cost and mean voucher are not independent for those quarters.
 - **FLAG: duplicate `total_k12_sn`.** FY23Q4 and FY24Q1 report the same value (10409). The duplicate does not follow the trend of the series. Likely cause: a reporting error by the agency, but this cannot be verified. The `total_sn` fills for FY23Q4 (11180) and FY24Q1 (11029) derive from these values (step 5) and inherit the uncertainty. Treat both quarters with caution in modelling.
+- **FLAG: FY24Q1 `kinder`.** Possible data error. The value (5,148) falls sharply after FY23Q4 (about 7,750), while grades 3, 6, 8 and 12 rise smoothly over the same quarters. Could not be validated. Treat FY23Q4-FY24Q1 kindergarten counts with caution in modelling.
 - Quarters before FY25Q1 vs. after use different cost sources, which matters for any model that uses cost as a target.
 
 ## Model Building
@@ -54,7 +55,7 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 
 **Question.** Which aspects drive enrolment and cost in the program?
 
-**Enrolment.**
+**Enrollment.**
 - First-order driver: incoming students (kindergarten) minus outgoing students (grade 12).
 - In practice more complicated. Students tend to leave the program before grade 9. This is a qualitative claim, not yet checked against data.
 
