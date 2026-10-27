@@ -21,9 +21,10 @@ def find(text, pattern):
 
 
 def fmt(v, money=False):
+    """Return a raw number (float for money, int for counts), or None if missing."""
     if v is None:
-        return NA
-    return f"${float(v):,.2f}" if money else f"{int(float(v)):,}"
+        return None
+    return round(float(v), 2) if money else int(float(v))
 
 
 def parse(text):
@@ -34,14 +35,15 @@ def parse(text):
         or find(text, r"^\s*Average\s+" + NUM)
     )
     total = (
-        find(text, r"Total Active ESA Students\s+" + NUM)
+        find(text, r"Total Active ESA Students(?: [\d,]+)*? " + NUM + r"[ \t]*$")
         or find(text, r"there are " + NUM + r" (?:active )?students")
-        or find(text, r"^\s*Total\s+" + NUM + r"\s*$")
+        or find(text, r"^\s*Total(?: [\d,]+)*? " + NUM + r"\s*$")
     )
 
     # Eligibility rows: "<label> <count>" at the start of a line.
     def row_ml(label):
-        m = re.search(r"^\s*" + label + r"\s+([\d,]+)\s*$", text, re.IGNORECASE | re.MULTILINE)
+        # Multi-quarter tables list several columns; the last is the current quarter.
+        m = re.search(r"^\s*" + label + r"(?: [\d,]+)*? ([\d,]+)\s*$", text, re.IGNORECASE | re.MULTILINE)
         return clean(m.group(1)) if m else None
 
     dash = r"[—–-]"
@@ -53,10 +55,10 @@ def parse(text):
 
     return {
         "Mean Voucher": fmt(mean_voucher, money=True),
-        "Cost": NA,  # no separate cost figure is reported
+        "Cost": None,  # no separate cost figure is reported
         "Total Enrollment": fmt(total),
         "Universal Count": fmt(universal),
-        "Total Disability/Special Needs Count": NA,  # not reported as a separate figure
+        "Total Disability/Special Needs Count": None,  # not reported as a separate figure
         "Disability/Special Needs Count": fmt(special),
         "Military with Special Needs Count": fmt(mil_sn),
         "Preschool Count": fmt(preschool),
@@ -70,7 +72,7 @@ def main(path):
     reader = PdfReader(path)
     text = "\n".join(p.extract_text() or "" for p in reader.pages)
     for k, v in parse(text).items():
-        print(f"{k}: {v}")
+        print(f"{k}: {NA if v is None else v}")
 
 
 if __name__ == "__main__":
