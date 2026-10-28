@@ -1,6 +1,6 @@
 # Research Log
 
-Project: forecast Arizona ESA (voucher) enrolment and program cost from quarterly state reports (FY21Q2-FY26Q4). Modelling method not yet chosen.
+Project: forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports (FY21Q2-FY26Q4). Modelling method not yet chosen.
 
 ## Data extraction
 
@@ -11,7 +11,7 @@ Project: forecast Arizona ESA (voucher) enrolment and program cost from quarterl
 **Metrics extracted.**
 - Mean voucher
 - Total cost (annualized scholarship total)
-- Total enrolment
+- Total enrollment
 - Universal count
 - Total disability/special needs (SN) count
 - K-12 disability/SN count
@@ -43,7 +43,7 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 6. **Remaining blanks.** All other blank cells set to `N/A` (data not available). Affects `total_mil_sn` and `total_universal_sn`; counts in `decisions.md`.
 
 **Caveats.**
-- Filled `total_cost` for FY21Q2-FY24Q1 is an estimate (enrolment times mean voucher), not a reported figure. Reported cost uses an annualized basis; the identity is approximate.
+- Filled `total_cost` for FY21Q2-FY24Q1 is an estimate (enrollment times mean voucher), not a reported figure. Reported cost uses an annualized basis; the identity is approximate.
 - Filled `mean_voucher` for FY25+ is an implied average from reported cost, so cost and mean voucher are not independent for those quarters.
 - **FLAG: duplicate `total_k12_sn`.** FY23Q4 and FY24Q1 report the same value (10409). The duplicate does not follow the trend of the series. Likely cause: a reporting error by the agency, but this cannot be verified. The `total_sn` fills for FY23Q4 (11180) and FY24Q1 (11029) derive from these values (step 5) and inherit the uncertainty. Treat both quarters with caution in modelling.
 - **FLAG: FY24Q1 `kinder`.** Possible data error. The value (5,148) falls sharply after FY23Q4 (about 7,750), while grades 3, 6, 8 and 12 rise smoothly over the same quarters. Could not be validated. Treat FY23Q4-FY24Q1 kindergarten counts with caution in modelling.
@@ -53,11 +53,25 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 
 ### Exploration
 
-**Question.** Which aspects drive enrolment and cost in the program?
+**Question.** Which aspects drive enrollment and cost in the program?
 
-**Enrollment.**
+**enrollment.**
 - First-order driver: incoming students (kindergarten) minus outgoing students (grade 12).
 - In practice more complicated. Students tend to leave the program before grade 9. This is a qualitative claim, not yet checked against data.
+
+**Naive program growth.**
+- 4.08% per quarter in total enrollment (FY24Q1-FY26Q4, n = 12). Source: log-linear trend with quarter effects (`plots/plot_enrollment_seasonal_model.py`, `outputs/enrollment/enrollment_seasonal_model.png`); SE 0.0010 log points.
+- Seasonal factors: Q1 0.999, Q2 1.019, Q3 1.022, Q4 0.961.
+- Caveat: 12 points, 5 parameters; each factor rests on three observations. Baseline for later models, not a forecast method.
+
+**Naive mean voucher growth.**
+- 1.1% per quarter (FY24Q1-FY26Q4, n = 12). Source: OLS linear trend (`plots/plot_mean_voucher_ols.py`, `outputs/mean_voucher/mean_voucher_ols.png`): slope $115.52 per quarter (SE $7.27, R² = 0.962), about 1.1% of the series mean ($10,266).
+- Caveat: 12 points. FY25+ values are implied averages (cost / enrollment), not reported (see Data cleaning, step 2). Baseline for later models, not a forecast method.
+
+**Mean voucher seasonality.**
+- Decision: no seasonal adjustment of `mean_voucher`.
+- Rationale: mean voucher is driven by the composition of enrolled students. Entry and exit at the start or end of the year show no pattern in who joins or leaves, so there is no mechanism for a seasonal effect.
+- Check: log-linear trend with quarter effects (FY24Q1-FY26Q4, n = 12; `plots/plot_mean_voucher_seasonal_model.py`, `outputs/mean_voucher/mean_voucher_seasonal_model.png`) gives factors Q1 0.9998, Q2 1.0061, Q3 0.9990, Q4 0.9951, all within 0.6% of 1. Trend 1.15% per quarter (SE 0.0007 log points). Consistent with the rationale, though 12 points give little power.
 
 **Cost.**
 - Special needs cost is driven in large part by autism, which carries the highest award value.
