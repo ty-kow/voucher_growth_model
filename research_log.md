@@ -76,4 +76,13 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 **Cost.**
 - Special needs cost is driven in large part by autism, which carries the highest award value.
 
+**Population baseline growth rate.**
+- Purpose: bring in population data to create a baseline growth rate for the program.
+- Data: observed population for 2023-2025; projections for 2026-2046.
+- Caveat: 2026-2046 values are projections, not observations, so any baseline built on them inherits projection uncertainty.
+- Source: Arizona Office of Economic Opportunity, Population Projections (https://oeo.az.gov/population/projections), "Arizona Population Projections: 2025 to 2060, Medium Series". Workbook: `data/raw/population/az_population_growth.xlsx`.
+- Extracted (2026-2046) to `data/processed/az_pop_proj_raw.csv` via `src/voucher_growth_model/extract_population.py`: `pop_0_4` (tab 2, both sexes, ages 0-4) and `pop_18_plus` (tab 3, both sexes, ages 18 and over). Statewide Arizona.
+- Plan: construct ages 5-17 (school-age proxy) from these two series plus the all-ages total `pop_total` (tab 3, "All Ages: Total"): `pop_total - pop_0_4 - pop_18_plus`. The 18+ column includes age 18, so the remainder is 5-17, not 5-18.
+- Scope note: 5-17 approximates the K-12 age population, not ESA-eligible or enrolled students.
+
 **New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.
