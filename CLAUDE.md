@@ -1,12 +1,17 @@
 ﻿# Voucher Growth Model
 
-Forecast Arizona ESA (voucher) enrolment and program cost from quarterly state reports. Enrolment drivers feed a cost projection. Modelling method is undecided; validate extraction first.
+Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports. enrollment drivers feed a cost projection. Modelling method is undecided; validate extraction first.
 
 ## Layout
 - `data/raw/voucher_reports/`: source PDFs (FY21Q2-FY26Q4), tracked in git
 - `data/processed/`: generated, tracked in git (`voucher_metrics_raw.csv` extractor output, `voucher_metrics_clean.csv` cleaned; changes logged in `decisions.md`)
-- `outputs/`: generated, gitignored
-- `src/voucher_growth_model/extract_esa.py`: PDF to CSV extractor
+- `outputs/`: generated files (graphs, analysis), no scripts, gitignored
+- `src/voucher_growth_model/`: all code, including scripts that create graphs
+  - `extract_esa.py`: PDF to CSV extractor
+  - `clean_esa.py`: raw to clean CSV
+  - `plots/plot_*.py`: graph scripts; run from the repo root, write to `outputs/`
+- `tests/`: pytest tests
+- Root docs: `decisions.md`, `research_log.md`, `README.md`
 
 ## Commands
 - `uv sync`
@@ -14,6 +19,7 @@ Forecast Arizona ESA (voucher) enrolment and program cost from quarterly state r
 
 ## Conventions
 - Use uv only; no pip.
+- Scripts go in `src/voucher_growth_model/`, not `outputs/`.
 - Add tests for any extraction change (pytest, text fixtures from PDFs).
 - Never edit files in `data/raw/`; confirm before touching them.
 - Missing values stay blank/N/A. Never impute or guess.

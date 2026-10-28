@@ -57,7 +57,7 @@ def chart_grades(text, total):
     """Grade counts from a bar-chart-only report (FY23Q4 SBE), or all None.
 
     The chart prints 14 bare numbers (preschool..12th) followed by the axis labels in the same order.
-    Accepted only when the labels follow in ascending order and the counts sum to total enrolment.
+    Accepted only when the labels follow in ascending order and the counts sum to total enrollment.
     """
     empty = {col: None for col, _ in GRADES}
     for m in re.finditer(r"(?:^[\d,]+ ?\n){13}^[\d,]+ ?$", text, re.MULTILINE):

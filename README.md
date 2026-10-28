@@ -1,6 +1,6 @@
 # Voucher Growth Model
 
-Forecasts enrolment and program cost for Arizona's Empowerment Scholarship Account (ESA) voucher program from quarterly state reports. Enrolment drivers feed a cost projection. The forecasting method is not yet chosen; the current stage is data extraction.
+Forecasts enrollment and program cost for Arizona's Empowerment Scholarship Account (ESA) voucher program from quarterly state reports. enrollment drivers feed a cost projection. The forecasting method is not yet chosen; the current stage is data extraction.
 
 ## Data
 
@@ -29,7 +29,7 @@ src/voucher_growth_model/   extraction code
 
 ## Methodology
 
-Text is extracted with pypdf, and metrics are parsed with regular expressions: mean voucher, total cost, total enrolment, and counts by eligibility category (universal, disability/special needs, military, preschool). Each metric has fallback patterns to handle format changes between reports.
+Text is extracted with pypdf, and metrics are parsed with regular expressions: mean voucher, total cost, total enrollment, and counts by eligibility category (universal, disability/special needs, military, preschool). Each metric has fallback patterns to handle format changes between reports.
 
 ## Limitations
 

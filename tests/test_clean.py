@@ -12,7 +12,7 @@ def row(**kw):
     return r
 
 
-def test_cost_filled_from_mean_and_enrolment():
+def test_cost_filled_from_mean_and_enrollment():
     r = clean_row(row(quarter="FY21Q4", mean_voucher="14543.0", total_enroll="9669"))
     assert r["total_cost"] == "140616267.00"
 
