@@ -8,10 +8,18 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 import pandas as pd
 
 SCENARIO_COLORS_5_19 = {"k9.9": "#1B9AAA", "k20": "#EC8C0D", "k30": "#D91111", "k40": "#D010C0"}
-POP_LABELS = {"total": "total population", "5_19": "population aged 5-19"}
+# Montserrat (OFL) is bundled in <repo root>/fonts
+for font_file in (Path(__file__).parents[3] / "fonts").glob("*.ttf"):
+    font_manager.fontManager.addfont(font_file)
+plt.rcParams["font.family"] = "Montserrat"
+TITLE = "Logarithmic Growth Model of Arizona's ESA Voucher Program, FY26 to FY46"
+POP_LABELS = {"total": "total", "5_19": "school-aged"}
+SUBTITLE = ("Future enrollment calculated using projected {pop} population in Arizona\n"
+            "and derived take-up rate, with four different ceilings")
 
 
 def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None:
@@ -36,8 +44,9 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
     ax.set_ylim(bottom=0)
     ax.legend(fontsize=8)
     pop_label = POP_LABELS[f["pop_base"].iloc[0]]
-    ax.set_title(f"Arizona ESA enrollment forecast, FY26-FY46 (logistic take-up x {pop_label})")
-    fig.tight_layout()
+    fig.suptitle(TITLE, fontsize=14, fontweight="bold", y=0.985)
+    fig.text(0.5, 0.925, SUBTITLE.format(pop=pop_label), ha="center", va="top", fontsize=10)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
 
