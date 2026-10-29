@@ -51,6 +51,6 @@ ax.tick_params(axis="x", rotation=70)
 ax.grid(axis="y", alpha=0.3)
 ax.legend(loc="lower right")
 fig.tight_layout()
-fig.savefig("outputs/naive_forecast/enrollment_trend_forecast.png", dpi=150)
+fig.savefig("outputs/forecast/enrollment_trend_forecast.png", dpi=150)
 
 print(pd.DataFrame({"quarter": future, "trend": trend[n:].round(0)}).to_string(index=False))

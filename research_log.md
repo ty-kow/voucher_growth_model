@@ -84,4 +84,28 @@ Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns:
 - Extracted (2026-2046) to `data/processed/raw/az_pop_proj_raw.csv` via `src/voucher_growth_model/extract_population.py`: `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19` (tab 2, both sexes, statewide Arizona). The 5-19 age groups match the age range of the actual population data in the `az_pop_real` CSVs.
 - Scope note: ages 5-19 approximate the school-aged population, not ESA-eligible or enrolled students.
 
+### Forecast (2026-10-29)
+
+Full parameter choices are in `decisions.md` (sections "Forecast scope" to "School-age (5-19) population version").
+
+**Data prep.**
+- Reorganized `data/processed/` into `raw/` and `clean/`; added population cleaning scripts (`clean_population_proj.py`, `clean_population_real.py`) and `plots/plot_pop_proj.py`.
+- Merged real (2023-2025) and projected (2026-2046) population into `data/processed/clean/az_pop_all_clean.csv` (`merge_population.py`), columns `pop_total`, `pop_5_19`, `source`. Caveat: sources differ, so a level shift at 2025/2026 is possible.
+
+**Method.** `src/voucher_growth_model/forecast.py`, annual FY26-FY46 (the FY26 row reproduces actuals).
+- Enrollment = take-up x population. Take-up = Q3 enrollment / population in the same calendar year (FY26Q3 pairs with 2026).
+- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share the rate fitted to FY23-FY26 (total r = 0.797; 5-19 r = 0.555), so scenarios diverge from FY27.
+- Cost = enrollment x mean voucher. Mean voucher grows from FY26 ($10,837.68) at 2% or the FY24-FY26 compound rate (about 5.1%/yr). Cost is reported in real FY26 dollars (2%/yr deflator) on the graph; the CSV also holds nominal.
+
+**Scenarios.**
+- Total population base: take-up 1.32% in FY26. Logistic fit to FY23-FY26 gives K = 1.44% (s.e. 0.16pp), r = 0.797. Ceilings 1.44%, 2%, 3%, 5% (10% dropped after the first graph, about 917k students by FY46).
+- 5-19 population base (separate outputs `forecast_5_19.*`): take-up FY23 3.48%, FY24 5.15%, FY25 6.05%, FY26 7.49%. Logistic fit K = 9.9% (s.e. 3.5pp), r = 0.555. Ceilings 9.9%, 20%, 30%, 40%.
+- Grid: 4 take-up paths x 2 mean-voucher rates = 8 per base.
+
+**Caveats.**
+- Logistic fits rest on 4 data points; ceilings from 1.5% to 10% fit almost as well, so ceilings are scenario choices, not estimates.
+- FY25-FY26 take-up growth on the 5-19 base (23.8%) vs. total base (16.1%): part may reflect the 2025/2026 real-to-projected population shift.
+- An earlier version solved r per ceiling to match FY25-FY26 growth, which made all FY27 values identical; replaced by the shared fitted r.
+- Mean voucher for FY25+ is an implied average (see Data cleaning, step 2).
+
 **New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.

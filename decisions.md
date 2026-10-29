@@ -107,3 +107,79 @@ Source: Arizona OEO population projections, 2025 to 2060, Medium Series (https:/
 
 - `data/processed/raw/az_pop_proj_raw.csv`: extractor output (`extract_population.py`), all from tab 2 (both-sexes "Total" row): `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19`. No values altered, nothing derived.
 - `data/processed/clean/az_pop_proj_clean.csv`: copy of the raw file with `pop_5_19 = pop_5_9 + pop_10_14 + pop_15_19` added (derived, not reported), to match the 5-19 age range of `az_pop_real_clean.csv`.
+- `data/processed/clean/az_pop_all_clean.csv`: real (2023-2025) and projected (2026-2046) population stacked by year (`merge_population.py`). Columns `year`, `pop_total`, `pop_5_19`, `source` (`real` or `proj`). No year overlaps; real wins if one does. Real `total_pop` renamed `pop_total`, `5-19` renamed `pop_5_19`. Real and projected come from different sources (see above), so a level shift at 2025/2026 is possible.
+
+## Forecast scope
+
+Decided by the user (2026-10-29):
+
+- Horizon: through FY36 or later.
+- Frequency: annual (fiscal year).
+- Enrollment method: take-up rate x population.
+- Cost method: enrollment x mean voucher, with mean voucher forecast separately.
+
+Still open: how quarters become annual values, which population base to use, how take-up is forecast, how mean voucher is forecast.
+
+## Forecast method details
+
+Decided by the user (2026-10-29):
+
+- Annual value: each fiscal year's Q3 report.
+- Take-up rate: enrollment / `pop_total`.
+- Take-up projection: scenario paths with a ceiling.
+- Mean voucher projection: scenario rates, including 2% inflation and the historical growth rate; any further scenarios are still open.
+
+## Forecast parameters
+
+Decided by the user (2026-10-29):
+
+- Population year: same calendar year as the Q3 report (FY26Q3 pairs with 2026).
+- Historical mean-voucher growth: compound rate over FY24-FY26 only (about 5.1%/yr).
+- Mean-voucher scenarios: 2% inflation, historical rate (FY24-FY26), high inflation (3.5%).
+- Take-up ceilings: fit a logistic curve to FY23-FY26 as a reference, then the user picks the ceilings.
+
+## Take-up scenarios
+
+Decided by the user (2026-10-29): take-up ceilings of 1.44% (logistic best fit to FY23-FY26), 3%, 5% and 10%. Each path approaches its ceiling at the fitted rate (r = 0.797/yr). Logistic fit: K = 0.0144 (s.e. 0.0016), r = 0.797, t0 = 0.146 (t = 0 at FY23); fixed ceilings from 1.5% to 10% fit almost as well (4 data points).
+
+Anchor: each logistic path is re-centred (t0 solved) so it passes through FY26 actual take-up (1.32%), keeping its ceiling and r = 0.797.
+
+## Forecast output
+
+Decided by the user (2026-10-29): forecast runs FY27-FY46 (later changed to start at FY26, see "Forecast start year"); all 12 combinations (4 take-up paths x 3 mean-voucher rates); cost reported in nominal dollars and in real FY26 dollars (deflated at 2%/yr). Mean voucher grows from FY26 actual ($10,837.68). Cost = enrollment x mean voucher.
+
+## Take-up scenarios revised
+
+Decided by the user (2026-10-29), after reviewing the first forecast graph:
+
+- 10% ceiling dropped (about 917k students by FY46); replaced with 2%. Ceilings are now 1.44%, 2%, 3%, 5%.
+- Approach rate: for each ceiling, r is solved so FY27 take-up grows by the FY25-FY26 take-up growth (16.1%). Resulting r: 2% = 0.520, 3% = 0.283, 5% = 0.208.
+- 1.44% cannot grow 16.1% without passing its ceiling, so it keeps the fitted r = 0.797.
+
+Forecast graph (2026-10-29, user): cost shown in real FY26 dollars only; Q3 actuals deflated at the same 2%/yr. `outputs/forecast/csv/forecast.csv` still holds both nominal and real cost.
+
+Mean-voucher scenarios (2026-10-29, user): 3.5% high-inflation scenario dropped. Remaining: 2% inflation and historical FY24-FY26 rate; grid is now 4 x 2 = 8.
+
+## School-age (5-19) population version
+
+Decided by the user (2026-10-29): a second forecast using take-up = enrollment / `pop_5_19`, written to separate files (`outputs/forecast/csv/forecast_5_19.csv`, `outputs/forecast/forecast_5_19.png`); the total-population version is unchanged.
+
+- Take-up (Q3): FY23 3.48%, FY24 5.15%, FY25 6.05%, FY26 7.49%. FY25-FY26 growth 23.8% (vs 16.1% on total population); 2025 is real and 2026 projected population, so part may be a source level shift.
+- Logistic fit to FY23-FY26: K = 9.90% (s.e. 3.5pp), r = 0.555.
+- Ceilings: 9.9% (fitted), 20%, 30%, 40%.
+- Rates: same rule as the total version (match FY26 take-up growth). All four ceilings can match it, so none uses the fitted r.
+- Forecast CSVs now carry `pop_base` and `pop` in place of `pop_total`.
+
+## Project setup and plots (2026-10-29)
+
+- `pyproject.toml`: added a hatchling build system with `src/voucher_growth_model` as the wheel package, so `uv run python -m voucher_growth_model.<module>` imports the package. `uv.lock` updated.
+- `plots/plot_pop_proj.py`: y-axis now starts at 0 so population changes are not visually exaggerated.
+- `plots/plot_pop_all.py` (`outputs/population/pop_all.png`): plots the merged real and projected series from `az_pop_all_clean.csv`.
+
+## Forecast start year
+
+Decided by the user (2026-10-29): forecast CSVs and graphs start at FY26 instead of FY27 (FY26-FY46, 21 years). The FY26 row is t = 0: take-up, enrollment and mean voucher equal the FY26 Q3 actuals, and cost is enrollment x mean voucher (not the reported FY26 cost). Applies to both population bases; all other choices unchanged.
+
+## Take-up rate (common r)
+
+Decided by the user (2026-10-29): all ceilings within a population base share the logistic rate fitted to FY23-FY26 take-up, so FY27 differs by scenario. Total population: r = 0.797. Ages 5-19: r = 0.555. This replaces the rule that solved r per ceiling to match FY25-FY26 take-up growth ("Take-up scenarios revised" and the 5-19 "Rates" line); ceilings and the FY26 anchor are unchanged. `rate_matching_growth` was removed from `forecast.py`.

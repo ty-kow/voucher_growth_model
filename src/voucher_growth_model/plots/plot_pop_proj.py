@@ -17,6 +17,7 @@ for ax, col, title, color in [
     ax.set_title(title, loc="left")
     ax.set_ylabel("Persons")
     ax.yaxis.set_major_formatter(lambda x, _: f"{x / 1e6:.2f}M")
+    ax.set_ylim(bottom=0)
     ax.grid(axis="y", alpha=0.3)
 axes[1].set_xlabel("Year")
 axes[1].set_xticks(df["year"][::2])
