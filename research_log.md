@@ -94,7 +94,7 @@ Full parameter choices are in `decisions.md` (sections "Forecast scope" to "Scho
 
 **Method.** `src/voucher_growth_model/forecast.py`, annual FY26-FY46 (the FY26 row reproduces actuals).
 - Enrollment = take-up x population. Take-up = Q3 enrollment / population in the same calendar year (FY26Q3 pairs with 2026).
-- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share r = continuous annual growth rate of take-up over FY23-FY26 (total r = 0.228; 5-19 r = 0.255), so scenarios diverge from FY27. FY22 would need a 2022 population, which the data does not have.
+- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share r = continuous annual growth rate of take-up, fitted to FY23-FY26 (slope of log take-up on year, all four years; 5-19 r = 0.246). It was first the endpoint rate ln(FY26 / FY23) / 3 (total r = 0.228; 5-19 r = 0.255), which ignored FY24 and FY25. Scenarios diverge from FY27. FY22 would need a 2022 population, which the data does not have.
 - Cost = enrollment x mean voucher. Mean voucher grows from FY26 ($10,837.68) at 2% or the FY24-FY26 compound rate (about 5.1%/yr). Cost is reported in real FY26 dollars (2%/yr deflator) on the graph; the CSV also holds nominal.
 
 **Scenarios.**
@@ -106,6 +106,7 @@ Full parameter choices are in `decisions.md` (sections "Forecast scope" to "Scho
 - Logistic fits rest on 4 data points; ceilings from 1.5% to 10% fit almost as well, so ceilings are scenario choices, not estimates.
 - FY25-FY26 take-up growth on the 5-19 base (23.8%) vs. total base (16.1%): part may reflect the 2025/2026 real-to-projected population shift.
 - An earlier version solved r per ceiling to match FY25-FY26 growth, which made all FY27 values identical; replaced by the shared fitted r.
+- 5-19 take-up growth was uneven (continuous rates 0.392 FY23-24, 0.161 FY24-25, 0.214 FY25-26), so r from four points is not statistically strong. FY46 enrollment with r = 0.246: 9.9% = 134,648; 20% = 269,365; 30% = 400,187; 40% = 528,533.
 - Mean voucher for FY25+ is an implied average (see Data cleaning, step 2).
 
 **New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.

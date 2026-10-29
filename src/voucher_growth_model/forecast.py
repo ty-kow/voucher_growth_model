@@ -12,11 +12,12 @@ Usage (from the repo root):
 import math
 import sys
 
+import numpy as np
 import pandas as pd
 
 BASE_FY = 2026
 END_FY = 2046
-GROWTH_START_FY = 2023  # take-up growth measured FY23-FY26 (population data starts in 2023)
+GROWTH_START_FY = 2023  # take-up growth fitted over FY23-FY26 (population data starts in 2023)
 # Per population base: take-up ceilings. All ceilings share the approach rate r, the
 # continuous annual growth rate of take-up over FY23-FY26.
 BASES = {
@@ -43,7 +44,9 @@ def forecast(final_path, out_path, base="5_19") -> pd.DataFrame:
 
     takeup = v["total_enroll"] / pop
     y0 = takeup[BASE_FY]
-    r = math.log(y0 / takeup[GROWTH_START_FY]) / (BASE_FY - GROWTH_START_FY)
+    # Continuous growth rate: slope of log take-up on year over FY23-FY26 (uses every year in the window)
+    window = takeup.loc[GROWTH_START_FY:BASE_FY]
+    r = np.polyfit(window.index, np.log(window), 1)[0]
     m0 = v.loc[BASE_FY, "mean_voucher"]
     hist = (m0 / v.loc[BASE_VOUCHER_FY, "mean_voucher"]) ** (1 / (BASE_FY - BASE_VOUCHER_FY)) - 1
     rates = {"infl2": 0.02, "hist": hist}

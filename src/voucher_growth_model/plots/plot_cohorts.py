@@ -36,7 +36,7 @@ def plot_cohorts(csv_path: Path, out_path: Path) -> None:
         )
     fys = sorted(df["fy"])
     ax.set_xticks(fys, [f"FY{fy:02d}" for fy in fys])
-    ax.set_xlabel("Fiscal year (Q3)")
+    ax.set_xlabel("Fiscal Year (Q3)")
     ax.set_ylabel("Students enrolled")
     ax.set_title("Arizona ESA enrollment by cohort (grade 12 fiscal year)")
     ax.grid(alpha=0.3)

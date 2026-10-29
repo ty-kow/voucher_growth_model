@@ -1,5 +1,6 @@
 ﻿import math
 
+import numpy as np
 import pytest
 
 from voucher_growth_model.forecast import forecast, takeup_path
@@ -26,7 +27,9 @@ def test_takeup_path_anchored_and_bounded():
 def test_forecast_grid(tmp_path):
     v = final_data(tmp_path, pop_5_19=1_600_000)
     df = forecast(v, tmp_path / "out.csv")
-    r = math.log(2) / 3  # take-up doubles FY23-FY26 (3.125% to 6.25%)
+    # Take-up 3.125%, 4.375%, 5.5%, 6.25% for FY23-FY26; r is the slope of log take-up on year
+    r = np.polyfit([0, 1, 2, 3], np.log([50000, 70000, 88000, 100000]), 1)[0]
+    assert r != pytest.approx(math.log(2) / 3)  # not the FY23-FY26 endpoint rate
     assert len(df) == 21 * 4 * 2
     assert set(df.takeup_scenario) == {"k9.9", "k20", "k30", "k40"}
     assert (df.pop_base == "5_19").all()

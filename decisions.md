@@ -188,6 +188,10 @@ Decided by the user (2026-10-29): all ceilings within a population base share th
 
 Decided by the user (2026-10-29): the shared logistic rate r is now the continuous annual growth rate of take-up, r = ln(FY26 take-up / FY23 take-up) / 3, computed in `forecast.py` for each population base. Total population: r = 0.228. Ages 5-19: r = 0.255. This replaces the fixed fitted rates (0.797 / 0.555). The user asked for FY22-FY26, but population data starts in 2023, so FY22 take-up cannot be computed without imputing a 2022 population; FY23 was chosen as the start (user's choice). Ceilings, the FY26 anchor and mean-voucher scenarios are unchanged.
 
+## Take-up rate (FY23-FY26 fit, all four years)
+
+Decided by the user (2026-10-29): the shared logistic rate r is now the slope of log take-up on year over FY23-FY26 (least squares on all four years), replacing the FY23-FY26 endpoint rate ln(FY26 / FY23) / 3, which ignored FY24 and FY25. Ages 5-19: r = 0.246 (was 0.255). Ceilings, the FY26 anchor and mean-voucher scenarios are unchanged. `forecast.py` uses `numpy.polyfit`; the forecast CSV and `outputs/final/` graphs were regenerated. FY46 enrollment: 9.9% = 134,648; 20% = 269,365; 30% = 400,187; 40% = 528,533. Four data points, so r is not statistically strong. Earlier entries giving r = 0.255 are superseded.
+
 ## Extractor output renamed (2026-10-29)
 
 Decided by the user (2026-10-29): `data/processed/raw/` renamed to `data/processed/extracted/`, and extractor files renamed from `*_raw.csv` to `*_extracted.csv` (`voucher_metrics_extracted.csv`, `az_pop_proj_extracted.csv`, `az_pop_real_extracted.csv`). Paths updated in code, tests and docs. File contents unchanged. Earlier entries above that name `*_raw.csv` or `data/processed/raw/` refer to these files.

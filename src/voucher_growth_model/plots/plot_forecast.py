@@ -51,7 +51,7 @@ def plot_forecast(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None
                 ax.plot(s["fy"], s[col] / scale, color=colors[k],
                         linestyle="--" if col == "enroll" else ls, label=label)
         ax.set_ylabel(ylabel, labelpad=14 if col == "enroll" else 4)
-        ax.set_xlabel("Fiscal year")
+        ax.set_xlabel("Fiscal Year")
         ax.set_title(title)
         ax.tick_params(axis="x", rotation=60, labelsize=7)
         ax.grid(alpha=0.3)
