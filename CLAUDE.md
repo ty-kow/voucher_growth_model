@@ -7,7 +7,7 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 - `data/processed/`: generated, tracked in git; changes logged in `decisions.md`
   - `raw/`: extractor output (`voucher_metrics_raw.csv`, `az_pop_proj_raw.csv`, `az_pop_real_raw.csv`)
   - `clean/`: cleaned files (`voucher_metrics_clean.csv`, `az_pop_real_clean.csv`)
-- `outputs/`: generated files (graphs, analysis), no scripts, gitignored
+- `outputs/`: generated files (graphs, analysis), no scripts, tracked in git (`draft/`, `final/`)
 - `src/voucher_growth_model/`: all code, including scripts that create graphs
   - `extract_esa.py`: PDF to CSV extractor
   - `clean_esa.py`: raw to clean CSV
