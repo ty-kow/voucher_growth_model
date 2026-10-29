@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-df = pd.read_csv("data/processed/voucher_metrics_clean.csv", na_values=["N/A"])
+df = pd.read_csv("data/processed/clean/voucher_metrics_clean.csv", na_values=["N/A"])
 df = df[df["quarter"] >= "FY24Q1"][["quarter", "total_enroll"]].reset_index(drop=True)
 df["q"] = df["quarter"].str[-2:]
 

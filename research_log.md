@@ -6,7 +6,7 @@ Project: forecast Arizona ESA (voucher) enrollment and program cost from quarter
 
 **Source.** Quarterly ESA reports (PDF) from the Arizona Department of Education, stored in `data/raw/voucher_reports/` (FY21Q2-FY26Q4, 23 quarters). Raw files are not edited.
 
-**Tool.** `src/voucher_growth_model/extract_esa.py` reads each PDF with pypdf and parses metrics with regular expressions. Run on a folder, it writes one row per quarter to `data/processed/voucher_metrics_raw.csv`.
+**Tool.** `src/voucher_growth_model/extract_esa.py` reads each PDF with pypdf and parses metrics with regular expressions. Run on a folder, it writes one row per quarter to `data/processed/raw/voucher_metrics_raw.csv`.
 
 **Metrics extracted.**
 - Mean voucher
@@ -33,7 +33,7 @@ Project: forecast Arizona ESA (voucher) enrollment and program cost from quarter
 
 ## Data cleaning
 
-Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quarter, mean_voucher, total_cost, total_enroll, total_universal, total_sn, total_k12_sn, total_mil_sn, total_pre, total_universal_sn`). Every change is recorded in `decisions.md`. Filled values are marked `*` there. Steps 1, 2, 4, and 5 were explicit user instructions that override the project no-imputation rule.
+Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns: `quarter, mean_voucher, total_cost, total_enroll, total_universal, total_sn, total_k12_sn, total_mil_sn, total_pre, total_universal_sn`). Every change is recorded in `decisions.md`. Filled values are marked `*` there. Steps 1, 2, 4, and 5 were explicit user instructions that override the project no-imputation rule.
 
 1. **Total cost.** Blank `total_cost` filled with `total_enroll * mean_voucher` for FY21Q2-FY24Q1 (13 quarters). FY24Q2 onward were reported directly.
 2. **Mean voucher.** Blank `mean_voucher` filled with `total_cost / total_enroll` for FY25Q1-FY26Q4 (8 quarters), where cost is reported but no average is stated.
@@ -81,9 +81,7 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 - Data: observed population for 2023-2025; projections for 2026-2046.
 - Caveat: 2026-2046 values are projections, not observations, so any baseline built on them inherits projection uncertainty.
 - Source: Arizona Office of Economic Opportunity, Population Projections (https://oeo.az.gov/population/projections), "Arizona Population Projections: 2025 to 2060, Medium Series". Workbook: `data/raw/population/az_population_growth.xlsx`.
-- Extracted (2026-2046) to `data/processed/az_pop_proj_raw.csv` via `src/voucher_growth_model/extract_population.py`: `pop_0_4` (tab 2, both sexes, ages 0-4) and `pop_18_plus` (tab 3, both sexes, ages 18 and over). Statewide Arizona.
-- Plan: construct ages 5-17 (school-age proxy) from these two series plus the all-ages total `pop_total` (tab 3, "All Ages: Total"): `pop_total - pop_0_4 - pop_18_plus`. The 18+ column includes age 18, so the remainder is 5-17, not 5-18.
-- Scope note: 5-17 approximates the K-12 age population, not ESA-eligible or enrolled students.
-- TODO: decide whether to redo the projected population data (ages 5-17) to match the actual population data in the `school_aged_pop` CSVs (ages 5-19).
+- Extracted (2026-2046) to `data/processed/raw/az_pop_proj_raw.csv` via `src/voucher_growth_model/extract_population.py`: `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19` (tab 2, both sexes, statewide Arizona). The 5-19 age groups match the age range of the actual population data in the `az_pop_real` CSVs.
+- Scope note: ages 5-19 approximate the school-aged population, not ESA-eligible or enrolled students.
 
 **New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.

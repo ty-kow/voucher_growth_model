@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-df = pd.read_csv("data/processed/voucher_metrics_clean.csv", na_values=["N/A"])
+df = pd.read_csv("data/processed/clean/voucher_metrics_clean.csv", na_values=["N/A"])
 df = df[df["quarter"] >= "FY24Q1"][["quarter", "total_enroll"]].reset_index(drop=True)
 
 x = np.arange(len(df))

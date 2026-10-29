@@ -1,4 +1,4 @@
-﻿# Decisions
+# Decisions
 
 ## total_cost imputation
 
@@ -101,20 +101,9 @@ Grade-level enrollment (`kinder`, `grade_1` to `grade_12`) extracted from all qu
 
 Flag: FY25Q3 preschool is 1,340 (grade-level table), not 1,346 (eligibility table). Grade-level table chosen for consistency with the other grade data; with it, preschool plus grades sums to total enrollment (87,602). The extractor now takes preschool from the grade-level table for all quarters; no other quarter changed. `total_pre` in `voucher_metrics_clean.csv` updated to 1340.
 
-## Population projections: pop_5_17 derivation
+## Population projections
 
 Source: Arizona OEO population projections, 2025 to 2060, Medium Series (https://oeo.az.gov/population/projections). Statewide, both sexes, 2026-2046.
 
-- `data/processed/az_pop_proj_raw.csv`: extractor output (`extract_population.py`): `pop_0_4` (tab 2), `pop_18_plus` and `pop_total` (tab 3). No values altered.
-- `data/processed/az_pop_proj_clean.csv`: copy of the raw file with `pop_5_17 = pop_total - pop_0_4 - pop_18_plus` added (derived, not reported). Because the 18+ column includes age 18, the remainder is ages 5-17.
-- Approximates the K-12 age population, not ESA-eligible or enrolled students.
-
-| year | pop_5_17 |
-|---|---|
-| 2026 | 1149884* |
-| 2030 | 1111328* |
-| 2035 | 1088257* |
-| 2040 | 1119862* |
-| 2046 | 1163552* |
-
-Derived values are marked `*`. Table shows selected years; all 21 years are in the CSV.
+- `data/processed/raw/az_pop_proj_raw.csv`: extractor output (`extract_population.py`), all from tab 2 (both-sexes "Total" row): `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19`. No values altered, nothing derived.
+- `data/processed/clean/az_pop_proj_clean.csv`: copy of the raw file with `pop_5_19 = pop_5_9 + pop_10_14 + pop_15_19` added (derived, not reported), to match the 5-19 age range of `az_pop_real_clean.csv`.

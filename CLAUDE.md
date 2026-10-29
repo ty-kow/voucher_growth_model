@@ -4,7 +4,9 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 
 ## Layout
 - `data/raw/voucher_reports/`: source PDFs (FY21Q2-FY26Q4), tracked in git
-- `data/processed/`: generated, tracked in git (`voucher_metrics_raw.csv` extractor output, `voucher_metrics_clean.csv` cleaned; changes logged in `decisions.md`)
+- `data/processed/`: generated, tracked in git; changes logged in `decisions.md`
+  - `raw/`: extractor output (`voucher_metrics_raw.csv`, `az_pop_proj_raw.csv`, `az_pop_real_raw.csv`)
+  - `clean/`: cleaned files (`voucher_metrics_clean.csv`, `az_pop_real_clean.csv`)
 - `outputs/`: generated files (graphs, analysis), no scripts, gitignored
 - `src/voucher_growth_model/`: all code, including scripts that create graphs
   - `extract_esa.py`: PDF to CSV extractor
@@ -15,7 +17,7 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 
 ## Commands
 - `uv sync`
-- `uv run python -m voucher_growth_model.extract_esa data/raw/voucher_reports data/processed/voucher_metrics.csv`
+- `uv run python -m voucher_growth_model.extract_esa data/raw/voucher_reports data/processed/raw/voucher_metrics_raw.csv`
 
 ## Conventions
 - Use uv only; no pip.

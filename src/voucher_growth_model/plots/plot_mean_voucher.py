@@ -4,7 +4,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-df = pd.read_csv("data/processed/voucher_metrics_clean.csv", na_values=["N/A"])
+df = pd.read_csv("data/processed/clean/voucher_metrics_clean.csv", na_values=["N/A"])
 df = df[["quarter", "mean_voucher"]]
 
 fig, ax = plt.subplots(figsize=(11, 5))

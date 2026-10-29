@@ -1,4 +1,4 @@
-﻿import matplotlib
+import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-all_df = pd.read_csv("data/processed/voucher_metrics_clean.csv", na_values=["N/A"])
+all_df = pd.read_csv("data/processed/clean/voucher_metrics_clean.csv", na_values=["N/A"])
 all_df = all_df[["quarter", "total_enroll"]].dropna().reset_index(drop=True)
 df = all_df[all_df["quarter"] >= "FY24Q1"].reset_index(drop=True)  # fit window
 df["q"] = df["quarter"].str[-2:]
