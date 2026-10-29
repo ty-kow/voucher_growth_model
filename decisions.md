@@ -203,3 +203,12 @@ Decided by the user (2026-10-29): `outputs/final_data.csv` is built by `data_cle
 Updates (2026-10-29, user): the file was renamed from `final_data_voucher.csv` to `final_data.csv`. Population columns `pop_total` and `pop_5_19` were added, joined from `az_pop_all_clean.csv` by calendar year (FYxx pairs with 20xx; FY26 uses the projected value). FY21 and FY22 are `N/A` because population data starts in 2023; nothing was imputed. Rows FY27 to FY46 were added (26 rows in total) with `N/A` for `mean_voucher`, `total_cost` and `total_enroll`. `pop_total` was added because the forecast needs it and `forecast.py` now reads only `final_data.csv` (usage: `forecast FINAL_DATA OUT_CSV [total|5_19]`); it no longer reads `az_pop_all_clean.csv`. Forecast results are unchanged.
 
 Update (2026-10-29, user): `pop_total` removed from `final_data.csv` (columns now `year`, `mean_voucher`, `total_cost`, `total_enroll`, `pop_5_19`), and the forecast now produces only the ages 5-19 base (`pop_base` = `5_19`; ceilings k9.9, k20, k30, k40; 21 years x 4 ceilings x 2 voucher scenarios = 168 rows). The total-population base (ceilings k1.44, k2, k3, k5) was removed from `forecast.py`, so `forecast` takes `FINAL_DATA OUT_CSV` only. Earlier entries that describe the total-population base are superseded. The 5-19 results are unchanged.
+
+## Universal expansion timing and enrollment graphic (2026-10-29)
+
+Decided by the user (2026-10-29): universal expansion began in Q1 2023 (FY23Q1). This confirms the "Universal counts" entry above (zeros through FY22Q4). `outputs/final/forecast_enrollment_final.png` was revised in the same session:
+
+- The notes sentence about the FY23 expansion and FY21-FY22 take-up was removed. FY21-FY22 take-up is still absent from the forecast because population data starts in 2023.
+- Scenario lines keep the original teal/orange/red/magenta colours and gain distinct dash patterns (dotted for 9.9%, dashed for 20%, dash-dot for 30%, long dash for 40%) so they stay separable in greyscale and for colour-blind readers. A blue ramp was tried and reverted. End values are labelled on each line.
+- The notes no longer state the shared rate (r = 0.246) or the four-point fit; both are recorded in "Take-up rate (FY23-FY26 fit, all four years)" above.
+- Other edits: title and subtitle reworded, the 9.9% scenario relabelled "Best-fit ceiling, 9.9%", legend order reversed, FY26 population-source flag added to the notes, x-axis labels shown as calendar years (2021, 2023, 2026, then every fifth year), x-axis title removed.
