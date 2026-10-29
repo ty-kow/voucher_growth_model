@@ -183,3 +183,7 @@ Decided by the user (2026-10-29): forecast CSVs and graphs start at FY26 instead
 ## Take-up rate (common r)
 
 Decided by the user (2026-10-29): all ceilings within a population base share the logistic rate fitted to FY23-FY26 take-up, so FY27 differs by scenario. Total population: r = 0.797. Ages 5-19: r = 0.555. This replaces the rule that solved r per ceiling to match FY25-FY26 take-up growth ("Take-up scenarios revised" and the 5-19 "Rates" line); ceilings and the FY26 anchor are unchanged. `rate_matching_growth` was removed from `forecast.py`.
+
+## Take-up rate (FY23-FY26 growth)
+
+Decided by the user (2026-10-29): the shared logistic rate r is now the continuous annual growth rate of take-up, r = ln(FY26 take-up / FY23 take-up) / 3, computed in `forecast.py` for each population base. Total population: r = 0.228. Ages 5-19: r = 0.255. This replaces the fixed fitted rates (0.797 / 0.555). The user asked for FY22-FY26, but population data starts in 2023, so FY22 take-up cannot be computed without imputing a 2022 population; FY23 was chosen as the start (user's choice). Ceilings, the FY26 anchor and mean-voucher scenarios are unchanged.

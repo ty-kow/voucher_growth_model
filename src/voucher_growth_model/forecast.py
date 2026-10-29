@@ -2,7 +2,7 @@
 The FY26 row (t = 0) reproduces the FY26 Q3 actuals.
 
 Enrollment = take-up x population (pop_total or pop_5_19; see BASES). Take-up follows a logistic path to each ceiling,
-re-centred to pass through FY26 actual take-up, at the rate fitted to FY23-FY26 take-up
+re-centred to pass through FY26 actual take-up, at the FY23-FY26 growth rate of take-up
 (the same for every ceiling in a base). Cost = enrollment x mean voucher, with mean voucher grown from FY26 at each scenario rate.
 Annual values come from each fiscal year's Q3 report; FYxx pairs with year 20xx.
 
@@ -16,18 +16,17 @@ import pandas as pd
 
 BASE_FY = 2026
 END_FY = 2046
-# Per population base: ceilings, and the approach rate r from the logistic fit to
-# FY23-FY26 take-up, shared by all ceilings.
+GROWTH_START_FY = 2023  # take-up growth measured FY23-FY26 (population data starts in 2023)
+# Per population base: take-up ceilings. All ceilings share the approach rate r, the
+# continuous annual growth rate of take-up over FY23-FY26.
 BASES = {
     "total": {
         "pop_col": "pop_total",
         "ceilings": {"k1.44": 0.0144, "k2": 0.02, "k3": 0.03, "k5": 0.05},
-        "r": 0.797,
     },
     "5_19": {
         "pop_col": "pop_5_19",
         "ceilings": {"k9.9": 0.0990, "k20": 0.20, "k30": 0.30, "k40": 0.40},
-        "r": 0.555,
     },
 }
 BASE_VOUCHER_FY = 2024  # historical growth measured FY24-FY26
@@ -49,7 +48,7 @@ def forecast(voucher_path, pop_path, out_path, base="total") -> pd.DataFrame:
 
     takeup = v["total_enroll"] / pop.reindex(v.index)
     y0 = takeup[BASE_FY]
-    r = cfg["r"]
+    r = math.log(y0 / takeup[GROWTH_START_FY]) / (BASE_FY - GROWTH_START_FY)
     m0 = v.loc[BASE_FY, "mean_voucher"]
     hist = (m0 / v.loc[BASE_VOUCHER_FY, "mean_voucher"]) ** (1 / (BASE_FY - BASE_VOUCHER_FY)) - 1
     rates = {"infl2": 0.02, "hist": hist}

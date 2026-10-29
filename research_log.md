@@ -94,7 +94,7 @@ Full parameter choices are in `decisions.md` (sections "Forecast scope" to "Scho
 
 **Method.** `src/voucher_growth_model/forecast.py`, annual FY26-FY46 (the FY26 row reproduces actuals).
 - Enrollment = take-up x population. Take-up = Q3 enrollment / population in the same calendar year (FY26Q3 pairs with 2026).
-- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share the rate fitted to FY23-FY26 (total r = 0.797; 5-19 r = 0.555), so scenarios diverge from FY27.
+- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share r = continuous annual growth rate of take-up over FY23-FY26 (total r = 0.228; 5-19 r = 0.255), so scenarios diverge from FY27. FY22 would need a 2022 population, which the data does not have.
 - Cost = enrollment x mean voucher. Mean voucher grows from FY26 ($10,837.68) at 2% or the FY24-FY26 compound rate (about 5.1%/yr). Cost is reported in real FY26 dollars (2%/yr deflator) on the graph; the CSV also holds nominal.
 
 **Scenarios.**

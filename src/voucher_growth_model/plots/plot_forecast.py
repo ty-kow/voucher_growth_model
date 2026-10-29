@@ -12,10 +12,12 @@ SCENARIO_COLORS_5_19 = {"k9.9": "#1B9AAA", "k20": "#EC8C0D", "k30": "#D91111", "
 for font_file in (Path(__file__).parents[3] / "fonts").glob("*.ttf"):
     font_manager.fontManager.addfont(font_file)
 plt.rcParams["font.family"] = "Montserrat"
-TITLE = "Logarithmic Growth Model of Arizona's ESA Voucher Program, FY26 to FY46"
-POP_LABELS = {"total": "total", "5_19": "school-aged"}
-SUBTITLE = ("Future enrollment calculated using projected {pop} population in Arizona\n"
-            "and derived take-up rate, with four different ceilings")
+TITLE = "Wide Ranging Potential for Growth in Arizona's ESA Voucher Program"
+SOURCE = ("Source: Arizona Department of Education for ESA enrollment data, "
+          "Arizona Office of Economic Opportunity for real and projected population data")
+POP_LABELS ={"total": "total", "5_19": "school-aged"}
+SUBTITLE = ("Future enrollment (FY26 to FY46) calculated using logarithmic growth model based on {pop}\n"
+            "population and derived take-up growth rate ({r:.3f} per year), with four different ceilings")
 VOUCHER_STYLES = {"infl2": "-", "hist": "--"}
 VOUCHER_LABELS = {"infl2": "voucher +2%/yr", "hist": "voucher hist. (FY24-26)"}
 
@@ -34,7 +36,7 @@ def plot_forecast(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None
     colors.update({k: c for k, c in SCENARIO_COLORS_5_19.items() if k in colors})
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-    panels = [("enroll", "Students enrolled", "Enrollment"),
+    panels = [("enroll", "Total ESA enrollment", "Enrollment"),
               ("cost_real_fy26", "Cost ($B, FY26 dollars)", "Cost, real (2%/yr deflator)")]
     for ax, (col, ylabel, title) in zip(axes, panels):
         scale = 1 if col == "enroll" else 1e9
@@ -46,8 +48,11 @@ def plot_forecast(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None
                     continue  # enrollment does not depend on voucher scenario
                 s = f[(f["takeup_scenario"] == k) & (f["voucher_scenario"] == g)]
                 label = k_label if g == "infl2" else None
-                ax.plot(s["fy"], s[col] / scale, color=colors[k], linestyle=ls, label=label)
-        ax.set_ylabel(ylabel)
+                # Enrollment lines are all dashed; on the cost panel dashes mark the voucher scenario
+                ax.plot(s["fy"], s[col] / scale, color=colors[k],
+                        linestyle="--" if col == "enroll" else ls, label=label)
+        ax.set_ylabel(ylabel, labelpad=14 if col == "enroll" else 4)
+        ax.set_xlabel("Fiscal year")
         ax.set_title(title)
         ax.tick_params(axis="x", rotation=60, labelsize=7)
         ax.grid(alpha=0.3)
@@ -58,8 +63,9 @@ def plot_forecast(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None
     axes[1].legend(fontsize=8)
     pop_label = POP_LABELS[f["pop_base"].iloc[0]]
     fig.suptitle(TITLE, fontsize=16, fontweight="bold", y=0.985)
-    fig.text(0.5, 0.925, SUBTITLE.format(pop=pop_label), ha="center", va="top", fontsize=11)
-    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.text(0.5, 0.925, SUBTITLE.format(pop=pop_label, r=f["r"].iloc[0]), ha="center", va="top", fontsize=11)
+    fig.text(0.01, 0.01, SOURCE, ha="left", va="bottom", fontsize=8)
+    fig.tight_layout(rect=(0, 0.04, 1, 0.94))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
 
