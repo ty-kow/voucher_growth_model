@@ -25,7 +25,7 @@ def test_pivot_sum_and_ratio(tmp_path):
 def test_matches_committed_clean_csv(tmp_path):
     root = Path(__file__).resolve().parents[1] / "data" / "processed"
     out = tmp_path / "clean.csv"
-    clean(root / "raw" / "az_pop_real_raw.csv", out)
+    clean(root / "extracted" / "az_pop_real_extracted.csv", out)
     pd.testing.assert_frame_equal(
         pd.read_csv(out), pd.read_csv(root / "clean" / "az_pop_real_clean.csv")
     )

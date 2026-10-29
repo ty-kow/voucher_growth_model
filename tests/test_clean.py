@@ -46,5 +46,5 @@ def test_missing_inputs_not_imputed():
 def test_matches_committed_clean_csv(tmp_path):
     root = Path(__file__).resolve().parents[1] / "data" / "processed"
     out = tmp_path / "clean.csv"
-    clean(root / "raw" / "voucher_metrics_raw.csv", out)
+    clean(root / "extracted" / "voucher_metrics_extracted.csv", out)
     assert out.read_bytes() == (root / "clean" / "voucher_metrics_clean.csv").read_bytes()

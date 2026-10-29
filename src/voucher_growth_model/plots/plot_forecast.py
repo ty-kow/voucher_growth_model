@@ -24,11 +24,10 @@ VOUCHER_LABELS = {"infl2": "voucher +2%/yr", "hist": "voucher hist. (FY24-26)"}
 
 def plot_forecast(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None:
     v = pd.read_csv(voucher_csv, na_values=["N/A"])
-    v = v[v["quarter"].str.endswith("Q3")]
-    actual_fy = v["quarter"].str[:4]
+    actual_fy = v["year"]
     actual_cost = v["total_enroll"] * v["mean_voucher"]
     # Actuals deflated to FY26 dollars at the same 2%/yr as the forecast
-    deflator = 1.02 ** (v["quarter"].str[2:4].astype(int) - 26)
+    deflator = 1.02 ** (v["year"].str[2:4].astype(int) - 26)
     f = pd.read_csv(forecast_csv)
     ceilings = {k: f"{k[1:]}% ceiling" + (" (trend)" if k == "k9.9" else "")
                 for k in f["takeup_scenario"].unique()}
@@ -36,7 +35,7 @@ def plot_forecast(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None
     colors.update({k: c for k, c in SCENARIO_COLORS_5_19.items() if k in colors})
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-    panels = [("enroll", "Total ESA enrollment", "Enrollment"),
+    panels = [("enroll", "Total ESA Enrollment", "Enrollment"),
               ("cost_real_fy26", "Cost ($B, FY26 dollars)", "Cost, real (2%/yr deflator)")]
     for ax, (col, ylabel, title) in zip(axes, panels):
         scale = 1 if col == "enroll" else 1e9

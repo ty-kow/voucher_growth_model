@@ -1,7 +1,7 @@
 ﻿"""Extract ESA program metrics from an Arizona ESA quarterly report PDF.
 
 Usage: python -m voucher_growth_model.data_cleaning.extract_esa "FY21Q2 SBE.pdf"
-       python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/raw/voucher_metrics_raw.csv   (one row per quarter)
+       python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/extracted/voucher_metrics_extracted.csv   (one row per quarter)
 Requires: pip install pypdf
 """
 import os

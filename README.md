@@ -13,7 +13,7 @@ FY24 quarters appear in two variants (`SBE` and non-`SBE`); the extractor merges
 
 ```
 uv sync
-uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/raw/voucher_metrics_raw.csv
+uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/extracted/voucher_metrics_extracted.csv
 ```
 
 Single report: `uv run python -m voucher_growth_model.data_cleaning.extract_esa "<file>.pdf"`
@@ -31,7 +31,7 @@ uv run python -m voucher_growth_model.data_cleaning.merge_population <real_clean
 Forecast (FY26-FY46 enrollment and cost; `total` is the default population base):
 
 ```
-uv run python -m voucher_growth_model.forecast <voucher_clean> <pop_all_clean> <out_csv> [total|5_19]
+uv run python -m voucher_growth_model.forecast <final_data> <out_csv>
 ```
 
 Plots: run `plots/plot_*.py` from the repo root; they write to `outputs/`.
@@ -40,7 +40,7 @@ Plots: run `plots/plot_*.py` from the repo root; they write to `outputs/`.
 
 ```
 data/raw/voucher_reports/             source PDFs (tracked)
-data/processed/raw/                   extractor output (tracked)
+data/processed/extracted/             extractor output (tracked)
 data/processed/clean/                 cleaned CSVs (tracked)
 outputs/draft/                        exploratory graphs and forecasts (tracked)
 outputs/final/                        final results (tracked)

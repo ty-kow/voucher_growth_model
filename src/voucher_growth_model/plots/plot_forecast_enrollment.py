@@ -1,7 +1,7 @@
 """Forecast enrollment by take-up scenario, with FY21-FY26 Q3 actuals (no cost).
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.plots.plot_forecast_enrollment <voucher_clean> <forecast_csv> <out_png>
+    uv run python -m voucher_growth_model.plots.plot_forecast_enrollment <final_data> <forecast_csv> <out_png>
 """
 
 import sys
@@ -26,7 +26,6 @@ SUBTITLE = ("Future enrollment (FY26 to FY46) calculated using logarithmic growt
 
 def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None:
     v = pd.read_csv(voucher_csv, na_values=["N/A"])
-    v = v[v["quarter"].str.endswith("Q3")]
     f = pd.read_csv(forecast_csv)
     # Enrollment does not depend on the voucher scenario
     f = f[f["voucher_scenario"] == f["voucher_scenario"].iloc[0]]
@@ -35,11 +34,11 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
     colors.update({k: c for k, c in SCENARIO_COLORS_5_19.items() if k in colors})
 
     fig, ax = plt.subplots(figsize=(9, 6))
-    ax.plot(v["quarter"].str[:4], v["total_enroll"], color="black", marker="o", label="Actual (Q3)")
+    ax.plot(v["year"], v["total_enroll"], color="black", marker="o", label="Actual (Q3)")
     for k in scenarios:
         s = f[f["takeup_scenario"] == k]
         ax.plot(s["fy"], s["enroll"], color=colors[k], linestyle="--", label=f"{k[1:]}% ceiling" + (" (trend)" if k == "k9.9" else ""))
-    ax.set_ylabel("Total ESA enrollment", labelpad=14)
+    ax.set_ylabel("Total ESA Enrollment", labelpad=14)
     ax.set_xlabel("Fiscal year")
     ax.yaxis.set_major_formatter(lambda x, _: f"{x / 1e3:,.0f}k")
     ax.tick_params(axis="x", rotation=60, labelsize=7)

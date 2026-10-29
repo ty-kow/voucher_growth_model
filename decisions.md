@@ -1,4 +1,4 @@
-# Decisions
+﻿# Decisions
 
 ## total_cost imputation
 
@@ -92,7 +92,7 @@ All other modelling decisions (method, targets, cost structure) are deferred unt
 
 ## Grade-level data brought in
 
-Grade-level enrollment (`kinder`, `grade_1` to `grade_12`) extracted from all quarterly PDFs and added to `voucher_metrics_raw.csv` and `voucher_metrics_clean.csv`. Preschool was already present (`Preschool Count` / `total_pre`). No values imputed.
+Grade-level enrollment (`kinder`, `grade_1` to `grade_12`) extracted from all quarterly PDFs and added to `voucher_metrics_extracted.csv` and `voucher_metrics_clean.csv`. Preschool was already present (`Preschool Count` / `total_pre`). No values imputed.
 
 - FY23Q4: the PDF has only a bar chart for total enrollment by grade; counts were read from the chart and accepted because preschool plus grades 1 to 12 sums to total enrollment (61,689).
 - All 23 quarters: preschool + `kinder` + `grade_1` to `grade_12` equals total enrollment.
@@ -105,7 +105,7 @@ Flag: FY25Q3 preschool is 1,340 (grade-level table), not 1,346 (eligibility tabl
 
 Source: Arizona OEO population projections, 2025 to 2060, Medium Series (https://oeo.az.gov/population/projections). Statewide, both sexes, 2026-2046.
 
-- `data/processed/raw/az_pop_proj_raw.csv`: extractor output (`extract_population.py`), all from tab 2 (both-sexes "Total" row): `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19`. No values altered, nothing derived.
+- `data/processed/extracted/az_pop_proj_extracted.csv`: extractor output (`extract_population.py`), all from tab 2 (both-sexes "Total" row): `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19`. No values altered, nothing derived.
 - `data/processed/clean/az_pop_proj_clean.csv`: copy of the raw file with `pop_5_19 = pop_5_9 + pop_10_14 + pop_15_19` added (derived, not reported), to match the 5-19 age range of `az_pop_real_clean.csv`.
 - `data/processed/clean/az_pop_all_clean.csv`: real (2023-2025) and projected (2026-2046) population stacked by year (`merge_population.py`). Columns `year`, `pop_total`, `pop_5_19`, `source` (`real` or `proj`). No year overlaps; real wins if one does. Real `total_pop` renamed `pop_total`, `5-19` renamed `pop_5_19`. Real and projected come from different sources (see above), so a level shift at 2025/2026 is possible.
 
@@ -187,3 +187,15 @@ Decided by the user (2026-10-29): all ceilings within a population base share th
 ## Take-up rate (FY23-FY26 growth)
 
 Decided by the user (2026-10-29): the shared logistic rate r is now the continuous annual growth rate of take-up, r = ln(FY26 take-up / FY23 take-up) / 3, computed in `forecast.py` for each population base. Total population: r = 0.228. Ages 5-19: r = 0.255. This replaces the fixed fitted rates (0.797 / 0.555). The user asked for FY22-FY26, but population data starts in 2023, so FY22 take-up cannot be computed without imputing a 2022 population; FY23 was chosen as the start (user's choice). Ceilings, the FY26 anchor and mean-voucher scenarios are unchanged.
+
+## Extractor output renamed (2026-10-29)
+
+Decided by the user (2026-10-29): `data/processed/raw/` renamed to `data/processed/extracted/`, and extractor files renamed from `*_raw.csv` to `*_extracted.csv` (`voucher_metrics_extracted.csv`, `az_pop_proj_extracted.csv`, `az_pop_real_extracted.csv`). Paths updated in code, tests and docs. File contents unchanged. Earlier entries above that name `*_raw.csv` or `data/processed/raw/` refer to these files.
+
+## final_data.csv (2026-10-29)
+
+Decided by the user (2026-10-29): `outputs/final_data.csv` is built by `data_cleaning/make_final_data.py` from `voucher_metrics_clean.csv`. It keeps `mean_voucher`, `total_cost` and `total_enroll` for the Q3 report of each fiscal year only (FY21Q3 to FY26Q3, 6 rows); the other quarters are dropped. The `quarter` column is renamed `year` and holds the fiscal year (`FY21` to `FY26`); each value is the Q3 value for that year. No values altered. `forecast.py` and `plots/plot_forecast.py` now read this file (column `year`) and no longer filter for Q3; the Q3 choice is unchanged from "Forecast method details" ("Annual value: each fiscal year's Q3 report") and now applies through this file. All forecast inputs from this file are Q3 values. They no longer accept `voucher_metrics_clean.csv`.
+
+Updates (2026-10-29, user): the file was renamed from `final_data_voucher.csv` to `final_data.csv`. Population columns `pop_total` and `pop_5_19` were added, joined from `az_pop_all_clean.csv` by calendar year (FYxx pairs with 20xx; FY26 uses the projected value). FY21 and FY22 are `N/A` because population data starts in 2023; nothing was imputed. Rows FY27 to FY46 were added (26 rows in total) with `N/A` for `mean_voucher`, `total_cost` and `total_enroll`. `pop_total` was added because the forecast needs it and `forecast.py` now reads only `final_data.csv` (usage: `forecast FINAL_DATA OUT_CSV [total|5_19]`); it no longer reads `az_pop_all_clean.csv`. Forecast results are unchanged.
+
+Update (2026-10-29, user): `pop_total` removed from `final_data.csv` (columns now `year`, `mean_voucher`, `total_cost`, `total_enroll`, `pop_5_19`), and the forecast now produces only the ages 5-19 base (`pop_base` = `5_19`; ceilings k9.9, k20, k30, k40; 21 years x 4 ceilings x 2 voucher scenarios = 168 rows). The total-population base (ceilings k1.44, k2, k3, k5) was removed from `forecast.py`, so `forecast` takes `FINAL_DATA OUT_CSV` only. Earlier entries that describe the total-population base are superseded. The 5-19 results are unchanged.

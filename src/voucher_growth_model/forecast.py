@@ -1,13 +1,13 @@
-"""Forecast ESA enrollment and cost, FY26-FY46 (see decisions.md for every choice).
+﻿"""Forecast ESA enrollment and cost, FY26-FY46 (see decisions.md for every choice).
 The FY26 row (t = 0) reproduces the FY26 Q3 actuals.
 
-Enrollment = take-up x population (pop_total or pop_5_19; see BASES). Take-up follows a logistic path to each ceiling,
+Enrollment = take-up x population aged 5-19 (pop_5_19; see BASES). Take-up follows a logistic path to each ceiling,
 re-centred to pass through FY26 actual take-up, at the FY23-FY26 growth rate of take-up
 (the same for every ceiling in a base). Cost = enrollment x mean voucher, with mean voucher grown from FY26 at each scenario rate.
 Annual values come from each fiscal year's Q3 report; FYxx pairs with year 20xx.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.forecast <voucher_clean> <pop_all_clean> <out_csv>
+    uv run python -m voucher_growth_model.forecast <final_data> <out_csv>
 """
 import math
 import sys
@@ -20,10 +20,6 @@ GROWTH_START_FY = 2023  # take-up growth measured FY23-FY26 (population data sta
 # Per population base: take-up ceilings. All ceilings share the approach rate r, the
 # continuous annual growth rate of take-up over FY23-FY26.
 BASES = {
-    "total": {
-        "pop_col": "pop_total",
-        "ceilings": {"k1.44": 0.0144, "k2": 0.02, "k3": 0.03, "k5": 0.05},
-    },
     "5_19": {
         "pop_col": "pop_5_19",
         "ceilings": {"k9.9": 0.0990, "k20": 0.20, "k30": 0.30, "k40": 0.40},
@@ -38,15 +34,14 @@ def takeup_path(y0, ceiling, r, t):
     return ceiling / (1 + (ceiling / y0 - 1) * math.exp(-r * t))
 
 
-def forecast(voucher_path, pop_path, out_path, base="total") -> pd.DataFrame:
+def forecast(final_path, out_path, base="5_19") -> pd.DataFrame:
     cfg = BASES[base]
-    v = pd.read_csv(voucher_path)
-    v = v[v["quarter"].str.endswith("Q3")].copy()
-    v["year"] = 2000 + v["quarter"].str[2:4].astype(int)
+    v = pd.read_csv(final_path)
+    v["year"] = 2000 + v["year"].str[2:4].astype(int)
     v = v.set_index("year")
-    pop = pd.read_csv(pop_path).set_index("year")[cfg["pop_col"]]
+    pop = v[cfg["pop_col"]]
 
-    takeup = v["total_enroll"] / pop.reindex(v.index)
+    takeup = v["total_enroll"] / pop
     y0 = takeup[BASE_FY]
     r = math.log(y0 / takeup[GROWTH_START_FY]) / (BASE_FY - GROWTH_START_FY)
     m0 = v.loc[BASE_FY, "mean_voucher"]
@@ -81,6 +76,6 @@ def forecast(voucher_path, pop_path, out_path, base="total") -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) not in (4, 5):
-        sys.exit("usage: python -m voucher_growth_model.forecast VOUCHER_CLEAN POP_ALL_CLEAN OUT_CSV [total|5_19]")
+    if len(sys.argv) != 3:
+        sys.exit("usage: python -m voucher_growth_model.forecast FINAL_DATA OUT_CSV")
     forecast(*sys.argv[1:])
