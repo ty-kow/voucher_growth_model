@@ -84,6 +84,6 @@ Cleaned file: `data/processed/voucher_metrics_clean.csv` (renamed columns: `quar
 - Extracted (2026-2046) to `data/processed/az_pop_proj_raw.csv` via `src/voucher_growth_model/extract_population.py`: `pop_0_4` (tab 2, both sexes, ages 0-4) and `pop_18_plus` (tab 3, both sexes, ages 18 and over). Statewide Arizona.
 - Plan: construct ages 5-17 (school-age proxy) from these two series plus the all-ages total `pop_total` (tab 3, "All Ages: Total"): `pop_total - pop_0_4 - pop_18_plus`. The 18+ column includes age 18, so the remainder is 5-17, not 5-18.
 - Scope note: 5-17 approximates the K-12 age population, not ESA-eligible or enrolled students.
-- TODO: change the format of the school-aged population data in the `school_aged_pop` CSVs to match the projection CSV: ages 5-17 rather than 5-19.
+- TODO: decide whether to redo the projected population data (ages 5-17) to match the actual population data in the `school_aged_pop` CSVs (ages 5-19).
 
 **New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.
