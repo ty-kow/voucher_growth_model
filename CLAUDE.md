@@ -17,7 +17,7 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 
 ## Commands
 - `uv sync`
-- `uv run python -m voucher_growth_model.extract_esa data/raw/voucher_reports data/processed/raw/voucher_metrics_raw.csv`
+- `uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/raw/voucher_metrics_raw.csv`
 
 ## Conventions
 - Use uv only; no pip.

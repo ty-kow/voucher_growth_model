@@ -1,9 +1,9 @@
-"""Raw population projection CSV to clean CSV.
+﻿"""Raw population projection CSV to clean CSV.
 
 Adds `pop_5_19 = pop_5_9 + pop_10_14 + pop_15_19` (derived, not reported).
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.clean_population_proj <raw_csv> <clean_csv>
+    uv run python -m voucher_growth_model.data_cleaning.clean_population_proj <raw_csv> <clean_csv>
 """
 import sys
 

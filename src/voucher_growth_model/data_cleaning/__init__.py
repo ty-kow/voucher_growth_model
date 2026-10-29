@@ -1,10 +1,10 @@
-"""Merge real and projected population clean CSVs into one year series.
+﻿"""Merge real and projected population clean CSVs into one year series.
 
 Keeps `pop_total` and `pop_5_19`; `source` is `real` or `proj`. Real values take
 precedence if a year appears in both.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.merge_population <real_clean> <proj_clean> <out_csv>
+    uv run python -m voucher_growth_model.data_cleaning.merge_population <real_clean> <proj_clean> <out_csv>
 """
 import sys
 
@@ -29,5 +29,5 @@ def merge(real_path, proj_path, out_path) -> pd.DataFrame:
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        sys.exit("usage: python -m voucher_growth_model.merge_population REAL_CLEAN PROJ_CLEAN OUT_CSV")
+        sys.exit("usage: python -m voucher_growth_model.data_cleaning.merge_population REAL_CLEAN PROJ_CLEAN OUT_CSV")
     merge(*sys.argv[1:])

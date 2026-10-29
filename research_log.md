@@ -1,4 +1,4 @@
-# Research Log
+﻿# Research Log
 
 Project: forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports (FY21Q2-FY26Q4). Modelling method not yet chosen.
 
@@ -6,7 +6,7 @@ Project: forecast Arizona ESA (voucher) enrollment and program cost from quarter
 
 **Source.** Quarterly ESA reports (PDF) from the Arizona Department of Education, stored in `data/raw/voucher_reports/` (FY21Q2-FY26Q4, 23 quarters). Raw files are not edited.
 
-**Tool.** `src/voucher_growth_model/extract_esa.py` reads each PDF with pypdf and parses metrics with regular expressions. Run on a folder, it writes one row per quarter to `data/processed/raw/voucher_metrics_raw.csv`.
+**Tool.** `src/voucher_growth_model/data_cleaning/extract_esa.py` reads each PDF with pypdf and parses metrics with regular expressions. Run on a folder, it writes one row per quarter to `data/processed/raw/voucher_metrics_raw.csv`.
 
 **Metrics extracted.**
 - Mean voucher
@@ -81,7 +81,7 @@ Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns:
 - Data: observed population for 2023-2025; projections for 2026-2046.
 - Caveat: 2026-2046 values are projections, not observations, so any baseline built on them inherits projection uncertainty.
 - Source: Arizona Office of Economic Opportunity, Population Projections (https://oeo.az.gov/population/projections), "Arizona Population Projections: 2025 to 2060, Medium Series". Workbook: `data/raw/population/az_population_growth.xlsx`.
-- Extracted (2026-2046) to `data/processed/raw/az_pop_proj_raw.csv` via `src/voucher_growth_model/extract_population.py`: `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19` (tab 2, both sexes, statewide Arizona). The 5-19 age groups match the age range of the actual population data in the `az_pop_real` CSVs.
+- Extracted (2026-2046) to `data/processed/raw/az_pop_proj_raw.csv` via `src/voucher_growth_model/data_cleaning/extract_population.py`: `pop_total`, `pop_5_9`, `pop_10_14`, `pop_15_19` (tab 2, both sexes, statewide Arizona). The 5-19 age groups match the age range of the actual population data in the `az_pop_real` CSVs.
 - Scope note: ages 5-19 approximate the school-aged population, not ESA-eligible or enrolled students.
 
 ### Forecast (2026-10-29)

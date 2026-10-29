@@ -1,8 +1,8 @@
-from pathlib import Path
+﻿from pathlib import Path
 
 import pandas as pd
 
-from voucher_growth_model.clean_population_real import clean
+from voucher_growth_model.data_cleaning.clean_population_real import clean
 
 
 def test_pivot_sum_and_ratio(tmp_path):

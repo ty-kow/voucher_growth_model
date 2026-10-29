@@ -1,6 +1,6 @@
-import pandas as pd
+﻿import pandas as pd
 
-from voucher_growth_model.merge_population import merge
+from voucher_growth_model.data_cleaning.merge_population import merge
 
 
 def test_merge_real_then_proj(tmp_path):

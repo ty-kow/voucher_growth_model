@@ -1,10 +1,10 @@
-"""Extract Arizona population projections (2026-2046) from the OEO workbook to CSV.
+﻿"""Extract Arizona population projections (2026-2046) from the OEO workbook to CSV.
 
 All columns come from tab 2 ("Pop By Age Group & Sex"), both-sexes "Total" row of
 each year block. No derived columns.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.extract_population <xlsx> <out_csv>
+    uv run python -m voucher_growth_model.data_cleaning.extract_population <xlsx> <out_csv>
 """
 import sys
 

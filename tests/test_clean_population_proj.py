@@ -1,6 +1,6 @@
-import pandas as pd
+﻿import pandas as pd
 
-from voucher_growth_model.clean_population_proj import clean
+from voucher_growth_model.data_cleaning.clean_population_proj import clean
 
 
 def test_pop_5_19_is_sum_of_age_groups(tmp_path):

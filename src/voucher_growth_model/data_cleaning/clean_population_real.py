@@ -1,11 +1,11 @@
-"""Raw actual population CSV (long format) to clean CSV (wide format).
+﻿"""Raw actual population CSV (long format) to clean CSV (wide format).
 
 Pivots to one row per year with columns 5-9, 10-14, 15-19, total_pop, and adds
 `5-19` (sum of the three age groups) and `school_aged_ratio` (5-19 / total_pop,
 rounded to 6 decimals). Both added columns are derived, not reported.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.clean_population_real <raw_csv> <clean_csv>
+    uv run python -m voucher_growth_model.data_cleaning.clean_population_real <raw_csv> <clean_csv>
 """
 import sys
 

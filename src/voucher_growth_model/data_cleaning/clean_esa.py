@@ -1,4 +1,4 @@
-"""Clean extractor output: raw CSV to clean CSV, following decisions.md.
+﻿"""Clean extractor output: raw CSV to clean CSV, following decisions.md.
 
 Steps 1, 2, 4 and 5 are user-instructed imputations that override the project
 no-imputation rule. Reported values are never overwritten.
@@ -83,5 +83,5 @@ def clean(raw_path, clean_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        sys.exit("usage: python -m voucher_growth_model.clean_esa RAW_CSV CLEAN_CSV")
+        sys.exit("usage: python -m voucher_growth_model.data_cleaning.clean_esa RAW_CSV CLEAN_CSV")
     clean(Path(sys.argv[1]), Path(sys.argv[2]))
