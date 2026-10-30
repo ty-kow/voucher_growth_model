@@ -17,9 +17,9 @@ SCENARIO_COLORS_5_19 = {"k9.9": "#1B9AAA", "k20": "#D97706", "k30": "#D91111", "
 # Distinct dash patterns so lines stay separable in greyscale and for colour-blind readers
 SCENARIO_STYLES_5_19 = {"k9.9": (0, (1, 2)), "k20": (0, (4, 2)), "k30": (0, (5, 2, 1, 2)), "k40": (0, (9, 3))}
 SCENARIO_LABELS_5_19 = {
-    "k9.9": "Best-fit forecast (9.9% take-up ceiling)",
-    "k20": "Medium forecast (20% take-up ceiling)",
-    "k30": "Medium-high forecast (30% take-up ceiling)",
+    "k9.9": "Baseline forecast (9.9% take-up ceiling)",
+    "k20": "Low forecast (20% take-up ceiling)",
+    "k30": "Medium forecast (30% take-up ceiling)",
     "k40": "High forecast (40% take-up ceiling)",
 }
 # Montserrat (OFL) is bundled in <repo root>/fonts
@@ -38,6 +38,7 @@ NOTES = ("Notes: Actual enrollment is the Q3 count in each fiscal year. Take-up 
          "ceiling. The 9.9% ceiling is the logistic best fit to FY23-FY26 take-up.")
 NOTES_WRAP = 148  # characters per notes line
 NOTES_LINE_HEIGHT = 0.0207  # figure fraction per 8 pt line
+NOTES_CLEARANCE = 0.45  # inches from the plot area's bottom edge to the top of the notes, past the tick labels
 FIG_HEIGHT = 6.85  # inches
 SAVE_DPI = 150
 POP_LABELS ={"total": "total", "5_19": "school-aged"}
@@ -46,7 +47,21 @@ SUBTITLE = ("Arizona's Empowerment Scholarship Account (ESA) voucher program was
             "could play out, each capped at a different share of school-aged children enrolled (the take-up ceiling).")
 
 
-def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None:
+def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Path, figsize: tuple[float, float] = (9, FIG_HEIGHT),
+                             subtitle_wrap: int | None = None, notes_wrap: int = NOTES_WRAP,
+                             show_title: bool = True, subtitle_top: float = 0.72,
+                             center_subtitle: bool = False, show_source: bool = True,
+                             reserve_note_lines: int = 0) -> tuple[float, float]:
+    """subtitle_wrap re-wraps the subtitle to that many characters per line; None keeps its hand-set line breaks.
+
+    show_title=False omits the title; the plot area then starts just below the subtitle, which sits subtitle_top inches
+    from the top. center_subtitle centres the subtitle over the plot area instead of the figure. show_source=False
+    omits the sources line and moves the notes up into its place. reserve_note_lines keeps room below the plot area for
+    at least that many lines of notes, so the plot area does not grow when the notes are wrapped wider.
+
+    Returns the plot area's (bottom, top) as figure fractions, so another chart can be aligned to it."""
+    height = figsize[1]
+    scale = FIG_HEIGHT / height  # converts the figure-fraction constants tuned for FIG_HEIGHT
     v = pd.read_csv(voucher_csv, na_values=["N/A"])
     f = pd.read_csv(forecast_csv)
     # Enrollment does not depend on the voucher scenario
@@ -55,7 +70,7 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
     colors = dict(zip(scenarios, plt.cm.viridis([0.0, 0.35, 0.65, 0.9])))
     colors.update({k: c for k, c in SCENARIO_COLORS_5_19.items() if k in colors})
 
-    fig, ax = plt.subplots(figsize=(9, FIG_HEIGHT))
+    fig, ax = plt.subplots(figsize=figsize)
     ax.plot(v["year"], v["total_enroll"], color="black", marker="o", label="Actual enrollment (Q3)")
     for k in scenarios:
         s = f[f["takeup_scenario"] == k]
@@ -89,22 +104,43 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
     pop_label = POP_LABELS[f["pop_base"].iloc[0]]
     # Vertical positions are fixed distances in inches from the top/bottom edge
     end = f[f["fy"] == "FY46"]["enroll"]
-    fig.suptitle(TITLE.format(lo=end.min() / 1e3, hi=end.max() / 1e3), fontsize=14, fontweight="bold", y=1 - 0.09 / FIG_HEIGHT)
-    fig.text(0.5, 1 - 0.72 / FIG_HEIGHT, SUBTITLE.format(pre=v.loc[v["year"] == "FY22", "total_enroll"].iloc[0] / 1e3,
-                                                         now=v.loc[v["year"] == "FY26", "total_enroll"].iloc[0] / 1e3), ha="center", va="top", fontsize=10)
-    notes = textwrap.fill(NOTES.format(r=f["r"].iloc[0], y0=f.loc[f["fy"] == "FY26", "takeup"].iloc[0]), NOTES_WRAP)
-    notes_text = fig.text(0, 0.01, notes, ha="left", va="bottom", fontsize=8)
-    source_y = 0.01 + (notes.count("\n") + 1) * NOTES_LINE_HEIGHT + 0.0135
-    source_text = fig.text(0, source_y, SOURCE, ha="left", va="bottom", fontsize=8)
-    # Both blocks share one left edge, set so the wider block is centred on the figure
+    if show_title:
+        fig.suptitle(TITLE.format(lo=end.min() / 1e3, hi=end.max() / 1e3), fontsize=14, fontweight="bold", y=1 - 0.09 / height)
+    subtitle = SUBTITLE.format(pre=v.loc[v["year"] == "FY22", "total_enroll"].iloc[0] / 1e3,
+                               now=v.loc[v["year"] == "FY26", "total_enroll"].iloc[0] / 1e3)
+    if subtitle_wrap:
+        subtitle = textwrap.fill(subtitle.replace("\n", " "), subtitle_wrap)
+    subtitle_text = fig.text(0.5, 1 - subtitle_top / height, subtitle, ha="center", va="top", fontsize=10)
+    extra_top = (subtitle.count("\n") - 2) * 0.17  # inches for subtitle lines beyond the default three
+    # Without a title, the plot area starts 0.2 in below the subtitle (tight_layout adds ~0.15 in to the rect)
+    rect_top = 0.65 + extra_top if show_title else subtitle_top + (subtitle.count("\n") + 1) * 0.167 + 0.05
+    notes = textwrap.fill(NOTES.format(r=f["r"].iloc[0], y0=f.loc[f["fy"] == "FY26", "takeup"].iloc[0]), notes_wrap)
+    line_height = NOTES_LINE_HEIGHT * scale
+    source_y = (0.01 + 0.0135) * scale + max(notes.count("\n") + 1, reserve_note_lines) * line_height
+    source = textwrap.fill(SOURCE, notes_wrap)
+    rect_bottom = source_y + (source.count("\n") + 1) * line_height
+    if show_source:
+        notes_text = fig.text(0, 0.01 * scale, notes, ha="left", va="bottom", fontsize=8)
+        source_text = fig.text(0, source_y, source, ha="left", va="bottom", fontsize=8)
+        blocks = (notes_text, source_text)
+    else:  # notes move up to sit directly below the plot area, freeing the bottom edge for a shared sources line
+        notes_text = fig.text(0, rect_bottom, notes, ha="left", va="top", fontsize=8)
+        blocks = (notes_text,)
+    # Blocks share one left edge, set so the widest is centred on the figure
     fig.set_dpi(SAVE_DPI)  # measure text at the saved resolution; widths differ slightly at other dpi
     fig.canvas.draw()
-    widest = max(t.get_window_extent().width for t in (notes_text, source_text))
-    for t in (notes_text, source_text):
+    widest = max(t.get_window_extent().width for t in blocks)
+    for t in blocks:
         t.set_x((fig.bbox.width - widest) / 2 / fig.bbox.width)
-    fig.tight_layout(rect=(0, source_y + NOTES_LINE_HEIGHT, 1, 1 - 0.65 / FIG_HEIGHT))
+    fig.tight_layout(rect=(0, rect_bottom, 1, 1 - rect_top / height))
+    pos = ax.get_position()
+    if not show_source:
+        notes_text.set_y(pos.y0 - NOTES_CLEARANCE / height)
+    if center_subtitle:
+        subtitle_text.set_x((pos.x0 + pos.x1) / 2)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=SAVE_DPI)
+    return pos.y0, pos.y1
 
 
 if __name__ == "__main__":
