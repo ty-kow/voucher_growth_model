@@ -43,6 +43,8 @@ FIG_HEIGHT = 6.85  # inches
 SAVE_DPI = 300
 PANEL_TITLE_TOP, PANEL_TITLE_FONTSIZE = 0.08, 16  # inches from the top edge; points
 SUBTITLE_LINE_HEIGHT = 0.167  # inches per subtitle line at 10 pt
+LINE_LABEL_Y = 0.42  # axes fraction at which the vertical line labels are centred
+LEGEND_FLOOR = 450_000  # gridline the legend is centred above
 POP_LABELS ={"total": "total", "5_19": "school-aged"}
 SUBTITLE = ("Arizona's Empowerment Scholarship Account (ESA) voucher program was expanded universally starting in 2023,\n"
             "after which enrollment increased from {pre:.0f}k to {now:.0f}k by 2026. Here are four scenarios of how future growth\n"
@@ -96,15 +98,24 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
     for x_pos, text in ((years.index("FY23"), "Universal Expansion"), (years.index("FY26"), None)):
         ax.axvline(x_pos, color="gray", alpha=0.4, linewidth=1, zorder=0)
         if text:
-            ax.text(x_pos - 0.12, 0.22, text, transform=ax.get_xaxis_transform(), rotation=90,
-                    ha="right", va="bottom", fontsize=8, color="dimgray")
+            ax.text(x_pos - 0.12, LINE_LABEL_Y, text, transform=ax.get_xaxis_transform(), rotation=90,
+                    ha="right", va="center", fontsize=8, color="dimgray")
+    # Light shading and a label mark everything after FY26 as projection. The label sits right of the line and above the
+    # forecast lines, which are still close together there.
+    ax.axvspan(years.index("FY26"), len(years) - 1, color="gray", alpha=0.08, linewidth=0, zorder=0)
+    ax.text(years.index("FY26") + 0.12, LINE_LABEL_Y, "Projection", transform=ax.get_xaxis_transform(), rotation=90,
+            ha="left", va="center", fontsize=8, color="dimgray")
     ax.grid(alpha=0.3)
     ax.grid(which="minor", axis="y", alpha=0.3)
     ax.tick_params(axis="y", which="minor", length=0)
     ax.set_ylim(0, f["enroll"].max() * 1.12)  # headroom for the end labels
     ax.set_xlim(right=len(pd.concat([v["year"], f["fy"]]).unique()) - 1)  # end the axis at the last forecast year
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], fontsize=8, loc="upper left", handlelength=4)  # same top-to-bottom order as the line ends
+    # Same top-to-bottom order as the line ends. Centred horizontally between FY26 and FY36 and vertically between the
+    # top of the plot and the LEGEND_FLOOR gridline (data units: one x per fiscal year).
+    ax.legend(handles[::-1], labels[::-1], fontsize=8, loc="center", handlelength=4, borderaxespad=0,
+              bbox_to_anchor=((years.index("FY26") + years.index("FY36")) / 2, (ax.get_ylim()[1] + LEGEND_FLOOR) / 2),
+              bbox_transform=ax.transData)
     pop_label = POP_LABELS[f["pop_base"].iloc[0]]
     # Vertical positions are fixed distances in inches from the top/bottom edge
     end = f[f["fy"] == "FY46"]["enroll"]
