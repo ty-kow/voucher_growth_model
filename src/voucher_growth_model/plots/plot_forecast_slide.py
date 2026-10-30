@@ -19,11 +19,14 @@ from voucher_growth_model.plots.plot_forecast_enrollment import SAVE_DPI, TITLE 
 CANVAS_SIZE = (16, 9)  # inches
 # Panel sizes in inches; widths sum to the canvas width. Wraps are characters per line at that width.
 ENROLLMENT = dict(figsize=(9.5, 9), subtitle_wrap=112, notes_wrap=145, reserve_note_lines=5)
-COST = dict(figsize=(6.5, 9), subtitle_wrap=68, notes_wrap=100)  # same height, so plot areas can line up
+COST = dict(figsize=(6.5, 9), subtitle_wrap=68, notes_wrap=104)  # same height, so plot areas can line up
 TITLE_FONTSIZE = 17  # the largest size that keeps the title on one line
-PANEL = dict(show_title=False, subtitle_top=0.57, center_subtitle=True, show_source=False)
+PANEL = dict(show_title=False, subtitle_top=0.57, center_subtitle=True, show_source=False)  # one slide title, one sources line
 SOURCE = ("Sources: Arizona Department of Education for ESA data, "
-          "Arizona Office of Economic Opportunity for population data")  # the slide's single title replaces panel titles
+          "Arizona Office of Economic Opportunity for population data")
+# The cost subtitle has two lines to the enrollment subtitle's three; drop it half a line so their centres match
+SUBTITLE_LINE_HEIGHT = 0.167  # inches at 10 pt
+COST_SUBTITLE_TOP = PANEL["subtitle_top"] + (3 - 2) / 2 * SUBTITLE_LINE_HEIGHT
 COST_TITLE = "; Cost Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B"
 
 
@@ -31,7 +34,7 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path) -
     with tempfile.TemporaryDirectory() as tmp:
         left, right = Path(tmp) / "enrollment.png", Path(tmp) / "cost.png"
         axes_y = plot_forecast_enrollment(voucher_csv, forecast_csv, left, **PANEL, **ENROLLMENT)
-        plot_forecast_cost(forecast_csv, right, axes_y=axes_y, **PANEL, **COST)  # bars level with the line graph
+        plot_forecast_cost(forecast_csv, right, axes_y=axes_y, **{**PANEL, "subtitle_top": COST_SUBTITLE_TOP}, **COST)  # bars level with the line graph
         images = [Image.open(p).convert("RGB") for p in (left, right)]
     canvas = Image.new("RGB", (sum(im.width for im in images), max(im.height for im in images)), "white")
     x = 0
@@ -43,7 +46,7 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path) -
     f46 = f[f["fy"] == "FY46"]
     enroll = f46["enroll"].drop_duplicates() / 1e3
     cost = [f46[(f46["takeup_scenario"] == k) & (f46["voucher_scenario"] == v)]["cost_real_fy26"].iloc[0] / 1e9
-            for k, v, _ in SCENARIOS]
+            for k, v, _, _ in SCENARIOS]
     title = (ENROLLMENT_TITLE.format(lo=enroll.min(), hi=enroll.max()).replace("\n", " ")
              + COST_TITLE.format(lo=min(cost), hi=max(cost)))
 

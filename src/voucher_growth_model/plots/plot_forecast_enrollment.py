@@ -30,9 +30,9 @@ TITLE = ("Enrollment in Arizona's Private School Voucher Program\n"
          "Could Reach {lo:,.0f}k to {hi:,.0f}k by 2046")
 SOURCE = ("Sources: Arizona Department of Education for ESA data, "
           "Arizona Office of Economic Opportunity for population data")
-NOTES = ("Notes: Actual enrollment is the Q3 count in each fiscal year. Take-up is ESA enrollment "
-         "divided by the population aged 5-19 in the matching calendar year; it was {y0:.2%} in FY26. "
-         "Population is projected for 2026-2046. FY26 take-up uses the projected 2026 population, which is about 5% "
+NOTES = ("Notes: Actual enrollment is the Q3 count in each fiscal year. Population is projected for 2026-2046. "
+         "Take-up is ESA enrollment divided by the population aged 5-19 in the matching calendar year; "
+         "it was {y0:.2%} in FY26. FY26 take-up uses the projected 2026 population, which is about 5% "
          "below the 2025 figure and comes from a different source; this raises FY26 take-up and the fitted rate. "
          "All four forecasts use the same logistic rate, so growth starts slower the closer FY26 take-up is to the "
          "ceiling. The 9.9% ceiling is the logistic best fit to FY23-FY26 take-up.")

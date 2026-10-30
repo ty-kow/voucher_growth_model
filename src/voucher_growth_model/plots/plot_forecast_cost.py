@@ -21,25 +21,26 @@ SOURCE = ("Sources: Arizona Department of Education for ESA data, "
           "Arizona Office of Economic Opportunity for population data")
 
 SHOWN_YEARS = ["FY26", "FY36", "FY46"]
-# (takeup scenario, voucher scenario, legend label), ascending cost
+# (takeup scenario, voucher scenario, hatch, legend label), ascending cost. Colour follows the take-up scenario; the
+# hatches differ so bars stay separable in greyscale and for colour-blind readers.
 SCENARIOS = [
-    ("k9.9", "infl2", "Baseline (baseline forecast + 2% voucher growth)"),
-    ("k20", "hist", "Low (low forecast + {r:.1%} voucher growth)"),
-    ("k30", "hist", "Medium (medium forecast + {r:.1%} voucher growth)"),
-    ("k40", "hist", "High (high forecast + {r:.1%} voucher growth)"),
+    ("k9.9", "infl2", "||", "Baseline (2% voucher growth)"),
+    ("k20", "infl2", "//", "Low (2% voucher growth)"),
+    ("k20", "hist", "..", "Medium-low ({r:.1%} voucher growth)"),
+    ("k30", "hist", "xx", "Medium ({r:.1%} voucher growth)"),
+    ("k40", "hist", "--", "High ({r:.1%} voucher growth)"),
 ]
 TITLE = ("Cost of Arizona's Private School Voucher Program\n"
          "Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B per Year by 2046")
-SUBTITLE = ("Annual cost in FY26 dollars under each of the four scenarios paired with\n"
+SUBTITLE = ("Annual cost in FY26 dollars under each of the five scenarios paired with\n"
             "inflationary or average voucher growth rate.")
 NOTES = ("Notes: Cost is projected enrollment multiplied by the mean voucher, deflated to FY26 dollars at 2% per year. "
-         "The baseline assumes the mean voucher grows 2% per year; the other scenarios assume it keeps growing at its "
-         "FY24-FY26 rate of {r:.1%} per year. Take-up ceilings are 9.9% (baseline), 20% (low), 30% (medium) and 40% (high). FY26 is the "
-         "actual Q3 enrollment times the mean voucher.")
-BAR_WIDTH = 0.2
-GROUP_GAP = 1 - 4 * BAR_WIDTH  # edge-to-edge gap between bar groups
-# Distinct hatches so bars stay separable in greyscale and for colour-blind readers
-HATCHES = {"k9.9": "..", "k20": "//", "k30": "||", "k40": "xx"}
+         "The baseline and low scenarios assume the mean voucher grows 2% per year; the others assume it keeps growing "
+         "at its FY24-FY26 rate of {r:.1%} per year. Take-up ceilings are 9.9% (baseline), 20% (low and medium-low), "
+         "30% (medium) and 40% (high). FY26 is the actual Q3 enrollment.")
+GROUP_WIDTH = 0.8  # bars in a group fill this much of the 1.0 spacing between groups
+BAR_WIDTH = GROUP_WIDTH / len(SCENARIOS)
+GROUP_GAP = 1 - GROUP_WIDTH  # edge-to-edge gap between bar groups
 plt.rcParams["hatch.linewidth"] = 1.0
 
 
@@ -60,7 +61,7 @@ def plot_forecast_cost(forecast_csv: Path, out_path: Path, figsize: tuple[float,
     cost = f.set_index(["fy", "takeup_scenario", "voucher_scenario"])["cost_real_fy26"] / 1e9
     m = f[(f["voucher_scenario"] == "hist") & (f["takeup_scenario"] == SCENARIOS[0][0])].set_index("fy")["mean_voucher"]
     hist_rate = m["FY27"] / m["FY26"] - 1
-    end = [cost[("FY46", k, v)] for k, v, _ in SCENARIOS]
+    end = [cost[("FY46", k, v)] for k, v, _, _ in SCENARIOS]
 
     fig, ax = plt.subplots(figsize=figsize)
     ticks = []
@@ -69,21 +70,21 @@ def plot_forecast_cost(forecast_csv: Path, out_path: Path, figsize: tuple[float,
         if fy == "FY26":
             # Double bar width, placed so the edge-to-edge gap to the FY36 group equals the gap between later groups
             w = 2 * BAR_WIDTH
-            ticks[-1] = 1 - 2 * BAR_WIDTH - GROUP_GAP - w / 2
+            ticks[-1] = 1 - GROUP_WIDTH / 2 - GROUP_GAP - w / 2
             val = cost[(fy, SCENARIOS[0][0], SCENARIOS[0][1])]
             ax.bar(ticks[-1], val, width=w, color="black")
             ax.annotate(f"\\${val:,.1f}B", (ticks[-1], val), xytext=(0, 3), textcoords="offset points",
                         ha="center", va="bottom", fontsize=8, color="#333333")
             continue
-        for j, (k, v, _) in enumerate(SCENARIOS):
+        for j, (k, v, hatch, _) in enumerate(SCENARIOS):
             val = cost[(fy, k, v)]
-            x = i + (j - 1.5) * BAR_WIDTH
-            ax.bar(x, val, width=BAR_WIDTH, color=SCENARIO_COLORS_5_19[k], hatch=HATCHES[k], edgecolor="white", linewidth=0)
+            x = i + (j - (len(SCENARIOS) - 1) / 2) * BAR_WIDTH
+            ax.bar(x, val, width=BAR_WIDTH, color=SCENARIO_COLORS_5_19[k], hatch=hatch, edgecolor="white", linewidth=0)
             ax.annotate(f"\\${val:,.1f}B", (x, val), xytext=(0, 3), textcoords="offset points",
                         ha="center", va="bottom", fontsize=7.5, color="#333333")
     ax.set_ylabel("Annual Cost ($ billions, FY26 dollars)", labelpad=14)
     ax.set_xticks(ticks, [f"20{y[2:]}" for y in SHOWN_YEARS])
-    ax.set_xlim(ticks[0] - BAR_WIDTH - GROUP_GAP, len(SHOWN_YEARS) - 1 + 2 * BAR_WIDTH + GROUP_GAP)
+    ax.set_xlim(ticks[0] - BAR_WIDTH - GROUP_GAP, len(SHOWN_YEARS) - 1 + GROUP_WIDTH / 2 + GROUP_GAP)
     ax.tick_params(axis="x", labelsize=9)
     ax.yaxis.set_major_locator(MultipleLocator(2))
     ax.yaxis.set_minor_locator(MultipleLocator(1))
@@ -94,8 +95,8 @@ def plot_forecast_cost(forecast_csv: Path, out_path: Path, figsize: tuple[float,
     ax.set_axisbelow(True)
     ax.set_ylim(0, max(end) * 1.12)
     handles = [
-        Patch(facecolor=SCENARIO_COLORS_5_19[k], edgecolor="white", linewidth=0, hatch=HATCHES[k],
-              label=label.format(r=hist_rate)) for k, _, label in SCENARIOS[::-1]
+        Patch(facecolor=SCENARIO_COLORS_5_19[k], edgecolor="white", linewidth=0, hatch=hatch,
+              label=label.format(r=hist_rate)) for k, _, hatch, label in SCENARIOS[::-1]
     ] + [Patch(color="black", label="Actual (FY26)")]
     ax.legend(handles=handles, fontsize=8, loc="upper left", handlelength=3, handleheight=1.4)
 
