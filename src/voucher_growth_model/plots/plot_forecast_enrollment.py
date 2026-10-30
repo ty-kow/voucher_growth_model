@@ -17,10 +17,10 @@ SCENARIO_COLORS_5_19 = {"k9.9": "#1B9AAA", "k20": "#D97706", "k30": "#D010C0", "
 # Distinct dash patterns so lines stay separable in greyscale and for colour-blind readers
 SCENARIO_STYLES_5_19 = {"k9.9": (0, (1, 2)), "k20": (0, (4, 2)), "k30": (0, (5, 2, 1, 2)), "k40": (0, (9, 3))}
 SCENARIO_LABELS_5_19 = {
-    "k9.9": "Baseline forecast (9.9% take-up ceiling)",
-    "k20": "Low forecast (20% take-up ceiling)",
-    "k30": "Medium forecast (30% take-up ceiling)",
-    "k40": "High forecast (40% take-up ceiling)",
+    "k9.9": "Baseline (9.9% take-up ceiling)",
+    "k20": "Low (20% take-up ceiling)",
+    "k30": "Medium (30% take-up ceiling)",
+    "k40": "High (40% take-up ceiling)",
 }
 # Montserrat (OFL) is bundled in <repo root>/fonts
 for font_file in (Path(__file__).parents[3] / "fonts").glob("*.ttf"):
@@ -41,6 +41,8 @@ NOTES_LINE_HEIGHT = 0.0207  # figure fraction per 8 pt line
 NOTES_CLEARANCE = 0.45  # inches from the plot area's bottom edge to the top of the notes, past the tick labels
 FIG_HEIGHT = 6.85  # inches
 SAVE_DPI = 300
+PANEL_TITLE_TOP, PANEL_TITLE_FONTSIZE = 0.08, 16  # inches from the top edge; points
+SUBTITLE_LINE_HEIGHT = 0.167  # inches per subtitle line at 10 pt
 POP_LABELS ={"total": "total", "5_19": "school-aged"}
 SUBTITLE = ("Arizona's Empowerment Scholarship Account (ESA) voucher program was expanded universally starting in 2023,\n"
             "after which enrollment increased from {pre:.0f}k to {now:.0f}k by 2026. Here are four scenarios of how future growth\n"
@@ -51,13 +53,15 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
                              subtitle_wrap: int | None = None, notes_wrap: int = NOTES_WRAP,
                              show_title: bool = True, subtitle_top: float = 0.72,
                              center_subtitle: bool = False, show_source: bool = True,
-                             reserve_note_lines: int = 0) -> tuple[float, float]:
+                             reserve_note_lines: int = 0, panel_title: str | None = None,
+                             subtitle_fontsize: float = 10) -> tuple[float, float]:
     """subtitle_wrap re-wraps the subtitle to that many characters per line; None keeps its hand-set line breaks.
 
     show_title=False omits the title; the plot area then starts just below the subtitle, which sits subtitle_top inches
     from the top. center_subtitle centres the subtitle over the plot area instead of the figure. show_source=False
     omits the sources line and moves the notes up into its place. reserve_note_lines keeps room below the plot area for
-    at least that many lines of notes, so the plot area does not grow when the notes are wrapped wider.
+    at least that many lines of notes, so the plot area does not grow when the notes are wrapped wider. panel_title adds
+    a bold heading PANEL_TITLE_TOP inches from the top, centred like the subtitle.
 
     Returns the plot area's (bottom, top) as figure fractions, so another chart can be aligned to it."""
     height = figsize[1]
@@ -110,10 +114,13 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
                                now=v.loc[v["year"] == "FY26", "total_enroll"].iloc[0] / 1e3)
     if subtitle_wrap:
         subtitle = textwrap.fill(subtitle.replace("\n", " "), subtitle_wrap)
-    subtitle_text = fig.text(0.5, 1 - subtitle_top / height, subtitle, ha="center", va="top", fontsize=10)
+    subtitle_text = fig.text(0.5, 1 - subtitle_top / height, subtitle, ha="center", va="top", fontsize=subtitle_fontsize)
+    subtitle_line = SUBTITLE_LINE_HEIGHT * subtitle_fontsize / 10  # inches per subtitle line
+    panel_title_text = (fig.text(0.5, 1 - PANEL_TITLE_TOP / height, panel_title, ha="center", va="top",
+                                 fontsize=PANEL_TITLE_FONTSIZE, fontweight="bold") if panel_title else None)
     extra_top = (subtitle.count("\n") - 2) * 0.17  # inches for subtitle lines beyond the default three
     # Without a title, the plot area starts 0.2 in below the subtitle (tight_layout adds ~0.15 in to the rect)
-    rect_top = 0.65 + extra_top if show_title else subtitle_top + (subtitle.count("\n") + 1) * 0.167 + 0.05
+    rect_top = 0.65 + extra_top if show_title else subtitle_top + (subtitle.count("\n") + 1) * subtitle_line + 0.05
     notes = textwrap.fill(NOTES.format(r=f["r"].iloc[0], y0=f.loc[f["fy"] == "FY26", "takeup"].iloc[0]), notes_wrap)
     line_height = NOTES_LINE_HEIGHT * scale
     source_y = (0.01 + 0.0135) * scale + max(notes.count("\n") + 1, reserve_note_lines) * line_height
@@ -138,6 +145,8 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
         notes_text.set_y(pos.y0 - NOTES_CLEARANCE / height)
     if center_subtitle:
         subtitle_text.set_x((pos.x0 + pos.x1) / 2)
+        if panel_title_text:
+            panel_title_text.set_x((pos.x0 + pos.x1) / 2)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=SAVE_DPI)
     return pos.y0, pos.y1

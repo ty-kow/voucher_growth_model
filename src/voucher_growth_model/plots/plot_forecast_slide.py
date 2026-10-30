@@ -19,16 +19,25 @@ from voucher_growth_model.plots.plot_forecast_enrollment import SAVE_DPI, TITLE 
 
 CANVAS_SIZE = (16, 9)  # inches
 # Panel sizes in inches; widths sum to the canvas width. Wraps are characters per line at that width.
-ENROLLMENT = dict(figsize=(9.5, 9), subtitle_wrap=112, notes_wrap=145, reserve_note_lines=5)
-COST = dict(figsize=(6.5, 9), subtitle_wrap=68, notes_wrap=104)  # same height, so plot areas can line up
-TITLE_FONTSIZE = 17  # the largest size that keeps the title on one line
-PANEL = dict(show_title=False, subtitle_top=0.57, center_subtitle=True, show_source=False)  # one slide title, one sources line
+TITLE_GAP = 0.95  # inches at the top of the canvas reserved for the two-line title; the panels fill the rest
+PANEL_HEIGHT = CANVAS_SIZE[1] - TITLE_GAP
+ENROLLMENT = dict(figsize=(9.5, PANEL_HEIGHT), subtitle_wrap=112, notes_wrap=145, reserve_note_lines=5)
+COST = dict(figsize=(6.5, PANEL_HEIGHT), subtitle_wrap=68, notes_wrap=104)  # same height, so plot areas can line up
+TITLE_FONTSIZE = 22  # the largest size that keeps each of the two title lines inside the canvas
+PANEL = dict(show_title=False, subtitle_top=0.15, center_subtitle=True, show_source=False)  # one slide title, one sources line
+PANEL_TITLES = ("Enrollment Forecasts", "Cost Forecasts")  # table variant only: left, right
+TITLED_SUBTITLE_TOP = 0.6  # inches, leaves room above the subtitles for the panel titles
+TITLED_SUBTITLE_FONTSIZE = 12
+# Subtitle wraps (characters per line) at that size: the left one stays within the line graph's plot area (about 9.8 in
+# wide at 12 pt); the right one is centred on its tables
+LEFT_TABLE_WRAP = dict(subtitle_wrap=84)
+RIGHT_TABLE_WRAP = dict(subtitle_wrap=56)
 SOURCE = ("Sources: Arizona Department of Education for ESA data, "
           "Arizona Office of Economic Opportunity for population data")
 # The cost subtitle has two lines to the enrollment subtitle's three; drop it half a line so their centres match
 SUBTITLE_LINE_HEIGHT = 0.167  # inches at 10 pt
 COST_SUBTITLE_TOP = PANEL["subtitle_top"] + (3 - 2) / 2 * SUBTITLE_LINE_HEIGHT
-COST_TITLE = "; Cost Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B"
+COST_TITLE = ";\nCost Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B"
 
 
 def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, table: bool = False) -> None:
@@ -36,13 +45,20 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, t
     cost_panel = plot_forecast_cost_table if table else plot_forecast_cost
     with tempfile.TemporaryDirectory() as tmp:
         left, right = Path(tmp) / "enrollment.png", Path(tmp) / "cost.png"
-        axes_y = plot_forecast_enrollment(voucher_csv, forecast_csv, left, **PANEL, **ENROLLMENT)
-        cost_panel(forecast_csv, right, axes_y=axes_y, **{**PANEL, "subtitle_top": COST_SUBTITLE_TOP}, **COST)  # panel level with the line graph
+        # The table variant heads each side with a title, so its subtitles start lower, level with each other; the bar
+        # variant centres the cost subtitle on the enrollment subtitle instead
+        panel = {**PANEL, "subtitle_top": TITLED_SUBTITLE_TOP, "subtitle_fontsize": TITLED_SUBTITLE_FONTSIZE} if table else PANEL
+        left_extra = dict(panel_title=PANEL_TITLES[0], **LEFT_TABLE_WRAP) if table else {}
+        right_extra = dict(panel_title=PANEL_TITLES[1], **RIGHT_TABLE_WRAP) if table else {}
+        axes_y = plot_forecast_enrollment(voucher_csv, forecast_csv, left, **panel, **{**ENROLLMENT, **left_extra})
+        panel = panel if table else {**PANEL, "subtitle_top": COST_SUBTITLE_TOP}
+        cost_panel(forecast_csv, right, axes_y=axes_y, **panel, **{**COST, **right_extra})  # panel level with the line graph
         images = [Image.open(p).convert("RGB") for p in (left, right)]
-    canvas = Image.new("RGB", (sum(im.width for im in images), max(im.height for im in images)), "white")
+    gap = round(TITLE_GAP * SAVE_DPI)
+    canvas = Image.new("RGB", (sum(im.width for im in images), max(im.height for im in images) + gap), "white")
     x = 0
     for im in images:
-        canvas.paste(im, (x, 0))
+        canvas.paste(im, (x, gap))
         x += im.width
 
     f = pd.read_csv(forecast_csv)
