@@ -77,7 +77,7 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
         ax.plot(s["fy"], s["enroll"], color=colors[k], linestyle=SCENARIO_STYLES_5_19.get(k, "--"), linewidth=1.8, label=SCENARIO_LABELS_5_19.get(k, f"{k[1:]}% ceiling forecast"))
         # End-of-line value label, anchored on the last forecast year
         ax.annotate(f"{s['enroll'].iloc[-1] / 1e3:,.0f}k", (s["fy"].iloc[-1], s["enroll"].iloc[-1]),
-                    xytext=(6, 0), textcoords="offset points", ha="left", va="center", fontsize=8, color="#333333", annotation_clip=False)
+                    xytext=(6, 0), textcoords="offset points", ha="left", va="center", fontsize=11, fontweight="bold", color=colors[k], annotation_clip=False)
     ax.set_ylabel("Total ESA Enrollment", labelpad=14)
     ax.yaxis.set_major_locator(MultipleLocator(100_000))  # labelled
     ax.yaxis.set_minor_locator(MultipleLocator(50_000))  # grid lines only
