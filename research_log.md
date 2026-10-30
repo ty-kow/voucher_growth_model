@@ -110,3 +110,21 @@ Full parameter choices are in `decisions.md` (sections "Forecast scope" to "Scho
 - Mean voucher for FY25+ is an implied average (see Data cleaning, step 2).
 
 **New decision.** Bring in grade-level data. Other modelling decisions (method, targets, cost structure) are deferred until this has been explored.
+
+### Grade-level vs. total enrollment trend (2026-10-29)
+
+Question: which grade's enrollment trend matches total enrollment (`total_enroll`) most closely? Source: `data/processed/clean/voucher_metrics_clean.csv`, grade columns `kinder`, `grade_1`-`grade_12`. Metrics: Pearson r on levels, and on quarter-over-quarter growth rates (more discriminating, since levels share a trend). Ad hoc computation; no script saved.
+
+**Full period (FY21Q2-FY26Q4, 23 quarters).**
+- Closest by level: grade 9 (r = 0.9999). Closest by growth rate: grades 5, 6 and 4 (r = 0.998); grade 9 r = 0.996.
+- Grade 9 share of total stable (6.2% to 6.3%).
+- Most divergent: kinder (growth r = 0.93) and grade 12 (0.91). Grade 11 share rose 4.2% to 5.1%; grade 12 fell 5.6% to 4.8%.
+
+**FY23Q1 onward (16 quarters, FY23Q1-FY26Q4).** Window read as fiscal-year labels, not calendar 2023.
+- Closest: grade 9 (growth r = 0.996, level r = 0.9995, tied with grade 6). Cumulative growth 224.3% vs. 227.2% total.
+- Second: grade 5 (growth r = 0.995, level r = 0.9994, cumulative 217.7%).
+- Most divergent: kinder (growth r = 0.76, level r = 0.87) and grade 12 (growth r = 0.62).
+
+**Caveats.**
+- Confidence: high on computed values; differences among grades 5, 6 and 9 are small and not statistically distinguishable at n = 16.
+- Correlations measure co-movement, not equal growth; cumulative growth differs by grade (grade 11 261%, grade 3 248%, grade 8 205% from FY23Q1).
