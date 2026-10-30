@@ -13,7 +13,7 @@ from matplotlib import font_manager
 from matplotlib.ticker import MultipleLocator
 import pandas as pd
 
-SCENARIO_COLORS_5_19 = {"k9.9": "#1B9AAA", "k20": "#D97706", "k30": "#D91111", "k40": "#D010C0"}
+SCENARIO_COLORS_5_19 = {"k9.9": "#1B9AAA", "k20": "#D97706", "k30": "#D010C0", "k40": "#D91111"}
 # Distinct dash patterns so lines stay separable in greyscale and for colour-blind readers
 SCENARIO_STYLES_5_19 = {"k9.9": (0, (1, 2)), "k20": (0, (4, 2)), "k30": (0, (5, 2, 1, 2)), "k40": (0, (9, 3))}
 SCENARIO_LABELS_5_19 = {
@@ -40,7 +40,7 @@ NOTES_WRAP = 148  # characters per notes line
 NOTES_LINE_HEIGHT = 0.0207  # figure fraction per 8 pt line
 NOTES_CLEARANCE = 0.45  # inches from the plot area's bottom edge to the top of the notes, past the tick labels
 FIG_HEIGHT = 6.85  # inches
-SAVE_DPI = 150
+SAVE_DPI = 300
 POP_LABELS ={"total": "total", "5_19": "school-aged"}
 SUBTITLE = ("Arizona's Empowerment Scholarship Account (ESA) voucher program was expanded universally starting in 2023,\n"
             "after which enrollment increased from {pre:.0f}k to {now:.0f}k by 2026. Here are four scenarios of how future growth\n"

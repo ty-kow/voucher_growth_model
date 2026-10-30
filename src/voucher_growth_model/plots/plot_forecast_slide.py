@@ -1,7 +1,7 @@
 """Enrollment and cost forecast charts side by side on one 16:9 canvas under a single title.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.plots.plot_forecast_slide <final_data> <forecast_csv> <out_png>
+    uv run python -m voucher_growth_model.plots.plot_forecast_slide <final_data> <forecast_csv> <out_png> [--table]
 """
 
 import sys
@@ -14,6 +14,7 @@ import pandas as pd
 from PIL import Image
 
 from voucher_growth_model.plots.plot_forecast_cost import SCENARIOS, plot_forecast_cost
+from voucher_growth_model.plots.plot_forecast_cost_table import plot_forecast_cost_table
 from voucher_growth_model.plots.plot_forecast_enrollment import SAVE_DPI, TITLE as ENROLLMENT_TITLE, plot_forecast_enrollment
 
 CANVAS_SIZE = (16, 9)  # inches
@@ -30,11 +31,13 @@ COST_SUBTITLE_TOP = PANEL["subtitle_top"] + (3 - 2) / 2 * SUBTITLE_LINE_HEIGHT
 COST_TITLE = "; Cost Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B"
 
 
-def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None:
+def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, table: bool = False) -> None:
+    """table=True replaces the cost bar chart with a table of FY46 costs."""
+    cost_panel = plot_forecast_cost_table if table else plot_forecast_cost
     with tempfile.TemporaryDirectory() as tmp:
         left, right = Path(tmp) / "enrollment.png", Path(tmp) / "cost.png"
         axes_y = plot_forecast_enrollment(voucher_csv, forecast_csv, left, **PANEL, **ENROLLMENT)
-        plot_forecast_cost(forecast_csv, right, axes_y=axes_y, **{**PANEL, "subtitle_top": COST_SUBTITLE_TOP}, **COST)  # bars level with the line graph
+        cost_panel(forecast_csv, right, axes_y=axes_y, **{**PANEL, "subtitle_top": COST_SUBTITLE_TOP}, **COST)  # panel level with the line graph
         images = [Image.open(p).convert("RGB") for p in (left, right)]
     canvas = Image.new("RGB", (sum(im.width for im in images), max(im.height for im in images)), "white")
     x = 0
@@ -59,4 +62,4 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path) -
 
 
 if __name__ == "__main__":
-    plot_forecast_slide(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]))
+    plot_forecast_slide(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), table="--table" in sys.argv[4:])
