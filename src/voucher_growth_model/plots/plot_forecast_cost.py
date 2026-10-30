@@ -18,7 +18,7 @@ from voucher_growth_model.plots.plot_forecast_enrollment import (
 )
 
 SOURCE = ("Sources: Arizona Department of Education for ESA data, "
-          "Arizona Office of Economic Opportunity for real and projected population data")
+          "Arizona Office of Economic Opportunity for population data")
 
 SHOWN_YEARS = ["FY26", "FY36", "FY46"]
 # (takeup scenario, voucher scenario, legend label), ascending cost

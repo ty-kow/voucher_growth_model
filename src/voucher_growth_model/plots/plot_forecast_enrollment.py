@@ -28,8 +28,8 @@ for font_file in (Path(__file__).parents[3] / "fonts").glob("*.ttf"):
 plt.rcParams["font.family"] = "Montserrat"
 TITLE = ("Enrollment in Arizona's Private School Voucher Program\n"
          "Could Reach {lo:,.0f}k to {hi:,.0f}k by 2046")
-SOURCE = ("Sources: Arizona Department of Education for ESA enrollment data, "
-          "Arizona Office of Economic Opportunity for real and projected population data")
+SOURCE = ("Sources: Arizona Department of Education for ESA data, "
+          "Arizona Office of Economic Opportunity for population data")
 NOTES = ("Notes: Actual enrollment is the Q3 count in each fiscal year. Take-up is ESA enrollment "
          "divided by the population aged 5-19 in the matching calendar year; it was {y0:.2%} in FY26. "
          "Population is projected for 2026-2046. FY26 take-up uses the projected 2026 population, which is about 5% "
