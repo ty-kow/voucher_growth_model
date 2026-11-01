@@ -1,4 +1,4 @@
-﻿"""Clean extractor output: raw CSV to clean CSV, following decisions.md.
+﻿"""Clean extractor output: raw CSV to clean CSV, following docs/decisions.md.
 
 Steps 1, 2, 4 and 5 are user-instructed imputations that override the project
 no-imputation rule. Reported values are never overwritten.

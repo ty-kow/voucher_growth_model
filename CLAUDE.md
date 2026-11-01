@@ -1,19 +1,22 @@
-﻿# Voucher Growth Model
+# Voucher Growth Model
 
 Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports. enrollment drivers feed a cost projection. Modelling method is undecided; validate extraction first.
 
 ## Layout
 - `data/raw/voucher_reports/`: source PDFs (FY21Q2-FY26Q4), tracked in git
-- `data/processed/`: generated, tracked in git; changes logged in `decisions.md`
+- `data/processed/`: generated, tracked in git; changes logged in `docs/decisions.md`
   - `extracted/`: extractor output (`voucher_metrics_extracted.csv`, `az_pop_proj_extracted.csv`, `az_pop_real_extracted.csv`)
   - `clean/`: cleaned files (`voucher_metrics_clean.csv`, `az_pop_real_clean.csv`)
-- `outputs/`: generated files (graphs, analysis), no scripts, tracked in git (`draft/`, `final/`)
+- `outputs/`: generated files (graphs, analysis), no scripts; `report/` tracked in git, `draft/` git-ignored
 - `src/voucher_growth_model/`: all code, including scripts that create graphs
-  - `extract_esa.py`: PDF to CSV extractor
-  - `clean_esa.py`: raw to clean CSV
-  - `plots/plot_*.py`: graph scripts; run from the repo root, write to `outputs/`
+  - `data_cleaning/`: `extract_esa.py` (PDF to CSV), `clean_esa.py` (raw to clean CSV), `extract_population.py`, `clean_population_proj.py`, `clean_population_real.py`, `merge_population.py`, `make_report_data.py`
+  - `forecast.py`: enrollment and cost forecast
+  - `plots_drafts/plot_*.py` (git-ignored): draft graph scripts; run from the repo root, write to `outputs/`
+  - `plots_report/fonts/`: bundled Montserrat (OFL), loaded by the forecast plots
+  - `plots_report/plot_*.py`: scripts for the `outputs/report/` report figures (`plot_forecast_slide --table --panels`, `plot_enrollment_actual`)
 - `tests/`: pytest tests
-- Root docs: `decisions.md`, `research_log.md`, `README.md`
+- `docs/`: `decisions.md`, `research_log.md`
+- Root docs: `README.md`
 
 ## Commands
 - `uv sync`

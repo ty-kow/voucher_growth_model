@@ -1,4 +1,4 @@
-﻿# Voucher Growth Model
+# Voucher Growth Model
 
 Forecasts enrollment and program cost for Arizona's Empowerment Scholarship Account (ESA) voucher program from quarterly state reports. enrollment drivers feed a cost projection. The forecasting method is not yet chosen; the current stage is data extraction, cleaning, and exploratory forecasts (drafts in `outputs/draft/`).
 
@@ -31,10 +31,10 @@ uv run python -m voucher_growth_model.data_cleaning.merge_population <real_clean
 Forecast (FY26-FY46 enrollment and cost; `total` is the default population base):
 
 ```
-uv run python -m voucher_growth_model.forecast <final_data> <out_csv>
+uv run python -m voucher_growth_model.forecast <report_data> <out_csv>
 ```
 
-Plots: run `plots/plot_*.py` from the repo root; they write to `outputs/`.
+Plots: run `plots_drafts/plot_*.py` from the repo root; they write to `outputs/`.
 
 ## Layout
 
@@ -43,10 +43,12 @@ data/raw/voucher_reports/             source PDFs (tracked)
 data/processed/extracted/             extractor output (tracked)
 data/processed/clean/                 cleaned CSVs (tracked)
 outputs/draft/                        exploratory graphs and forecasts (tracked)
-outputs/final/                        final results (tracked)
+outputs/report/                        final results (tracked)
 src/voucher_growth_model/data_cleaning/   extract, clean, and merge scripts
-src/voucher_growth_model/plots/       graph scripts
+src/voucher_growth_model/plots_drafts/       draft graph scripts
+src/voucher_growth_model/plots_report/       report figure scripts (fonts/ holds bundled Montserrat)
 src/voucher_growth_model/forecast.py  forecast
+docs/                                 decisions.md, research_log.md
 tests/                                pytest tests
 ```
 
@@ -54,7 +56,7 @@ tests/                                pytest tests
 
 Text is extracted with pypdf, and metrics are parsed with regular expressions: mean voucher, total cost, total enrollment, and counts by eligibility category (universal, disability/special needs, military, preschool). Each metric has fallback patterns to handle format changes between reports.
 
-Forecast (`forecast.py`): enrollment = take-up x population (total or ages 5-19). Take-up follows a logistic path to a ceiling, passing through FY26 actual take-up at the FY23-FY26 growth rate. Cost = enrollment x mean voucher, with mean voucher grown from FY26 at 2% inflation or the FY24-FY26 historical rate; real values are in FY26 dollars (2% deflator). Choices are recorded in `decisions.md`.
+Forecast (`forecast.py`): enrollment = take-up x population (total or ages 5-19). Take-up follows a logistic path to a ceiling, passing through FY26 actual take-up at the FY23-FY26 growth rate. Cost = enrollment x mean voucher, with mean voucher grown from FY26 at 2% inflation or the FY24-FY26 historical rate; real values are in FY26 dollars (2% deflator). Choices are recorded in `docs/decisions.md`.
 
 ## Limitations
 

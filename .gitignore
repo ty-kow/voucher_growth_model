@@ -3,3 +3,8 @@
 .venv/
 .env
 .ipynb_checkpoints/
+.pytest_cache/
+
+# Drafts (local only)
+outputs/draft/
+src/voucher_growth_model/plots_drafts/

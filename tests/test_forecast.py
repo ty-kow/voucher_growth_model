@@ -1,4 +1,4 @@
-﻿import math
+import math
 
 import numpy as np
 import pytest
@@ -6,15 +6,15 @@ import pytest
 from voucher_growth_model.forecast import forecast, takeup_path
 
 
-def final_data(tmp_path, pop_5_19):
-    """final_data.csv fixture: FY23-FY26 actuals, FY27-FY46 voucher values N/A."""
+def report_data(tmp_path, pop_5_19):
+    """report_data.csv fixture: FY23-FY26 actuals, FY27-FY46 voucher values N/A."""
     actual = {2023: (8000, 50000), 2024: (9000, 70000), 2025: (9500, 88000), 2026: (10000, 100000)}
     rows = "".join(
         f"FY{y % 100:02d},{actual[y][0] if y in actual else 'N/A'},N/A,"
         f"{actual[y][1] if y in actual else 'N/A'},{pop_5_19}\n"
         for y in range(2023, 2047)
     )
-    path = tmp_path / "final_data.csv"
+    path = tmp_path / "report_data.csv"
     path.write_text("year,mean_voucher,total_cost,total_enroll,pop_5_19\n" + rows)
     return path
 
@@ -25,7 +25,7 @@ def test_takeup_path_anchored_and_bounded():
 
 
 def test_forecast_grid(tmp_path):
-    v = final_data(tmp_path, pop_5_19=1_600_000)
+    v = report_data(tmp_path, pop_5_19=1_600_000)
     df = forecast(v, tmp_path / "out.csv")
     # Take-up 3.125%, 4.375%, 5.5%, 6.25% for FY23-FY26; r is the slope of log take-up on year
     r = np.polyfit([0, 1, 2, 3], np.log([50000, 70000, 88000, 100000]), 1)[0]

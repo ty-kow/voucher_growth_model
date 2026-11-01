@@ -1,4 +1,4 @@
-﻿"""Forecast ESA enrollment and cost, FY26-FY46 (see decisions.md for every choice).
+"""Forecast ESA enrollment and cost, FY26-FY46 (see docs/decisions.md for every choice).
 The FY26 row (t = 0) reproduces the FY26 Q3 actuals.
 
 Enrollment = take-up x population aged 5-19 (pop_5_19; see BASES). Take-up follows a logistic path to each ceiling,
@@ -7,7 +7,7 @@ re-centred to pass through FY26 actual take-up, at the FY23-FY26 growth rate of 
 Annual values come from each fiscal year's Q3 report; FYxx pairs with year 20xx.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.forecast <final_data> <out_csv>
+    uv run python -m voucher_growth_model.forecast <report_data> <out_csv>
 """
 import math
 import sys
