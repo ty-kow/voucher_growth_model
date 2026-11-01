@@ -14,7 +14,7 @@ import pandas as pd
 
 from voucher_growth_model.plots_report.plot_forecast_enrollment import (
     FIG_HEIGHT, NOTES_CLEARANCE, PANEL_TITLE_FONTSIZE, PANEL_TITLE_TOP, SAVE_DPI, SCENARIO_COLORS_5_19, SOURCE,
-    SOURCE_GAP, SUBTITLE_LINE_HEIGHT,
+    SOURCE_GAP, SUBTITLE_LINE_HEIGHT, BOTTOM_MARGIN, bottom_bbox,
 )
 
 YEARS = ["FY36", "FY46"]
@@ -24,6 +24,7 @@ TABLE_X, TABLE_W = 0.32, 0.62
 TABLE_Y = [(0.54, 0.91), (0.07, 0.44)]
 ACTUAL_GAP = 0.2  # inches between the subtitle's last line and the FY26 line
 ACTUAL_TEXT_HEIGHT = 0.25  # inches the 14 pt FY26 line occupies
+TABLE_NOTES_GAP = 0.25  # inches from the lower table to the notes in the report figure (no tick labels to clear)
 TABLES_GAP = 0.1  # inches between the FY26 line and the first year label
 YEAR_LABEL_HEIGHT, YEAR_GAP = 0.3, 0.2  # inches: a year label above its table; between one table and the next label
 ROWS = [("k40", "High (40% take-up ceiling)"), ("k30", "Medium (30% take-up ceiling)"),
@@ -38,7 +39,8 @@ def plot_forecast_cost_table(forecast_csv: Path, out_path: Path, figsize: tuple[
                              subtitle_wrap: int | None = 68, notes_wrap: int = 104,
                              axes_y: tuple[float, float] | None = None, subtitle_top: float = 0.57,
                              center_subtitle: bool = True, panel_title: str | None = None,
-                             subtitle_fontsize: float = 10, show_source: bool = False, **_) -> None:
+                             subtitle_fontsize: float = 10, show_source: bool = False,
+                             bottom_margin: float | None = None, **_) -> None:
     """Keyword arguments follow plot_forecast_cost so the slide can swap the two panels; extras are ignored.
     center_subtitle=False centres the title, subtitle and FY26 line on the figure instead of the axes. show_source adds
     the sources line below the notes."""
@@ -111,7 +113,7 @@ def plot_forecast_cost_table(forecast_csv: Path, out_path: Path, figsize: tuple[
         pos = ax.get_position()
         ax.set_position((pos.x0, axes_y[0], pos.width, axes_y[1] - axes_y[0]))
     pos = ax.get_position()
-    notes_text.set_y(pos.y0 - NOTES_CLEARANCE / height)
+    notes_text.set_y(pos.y0 - (NOTES_CLEARANCE if bottom_margin is None else TABLE_NOTES_GAP) / height)
     if center_subtitle:
         subtitle_text.set_x((pos.x0 + pos.x1) / 2)
         actual_text.set_x((pos.x0 + pos.x1) / 2)
@@ -123,11 +125,12 @@ def plot_forecast_cost_table(forecast_csv: Path, out_path: Path, figsize: tuple[
         fig.text(notes_text.get_position()[0], notes_bottom - SOURCE_GAP / height, textwrap.fill(SOURCE, notes_wrap),
                  ha="left", va="top", fontsize=8)  # wrapped and aligned like the notes
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=SAVE_DPI)
+    fig.savefig(out_path, dpi=SAVE_DPI, bbox_inches=bottom_bbox(fig, bottom_margin))
 
 
 if __name__ == "__main__":
     # Report figure: own title and sources line, taller than the slide panel so the notes fit
     plot_forecast_cost_table(Path(sys.argv[1]), Path(sys.argv[2]), figsize=(6.5, 8.05),
                              panel_title="ESA Voucher Cost Forecasts", subtitle_top=0.5, subtitle_fontsize=12,
-                             subtitle_wrap=50, center_subtitle=False, axes_y=(0.2, 0.8), show_source=True)
+                             subtitle_wrap=50, center_subtitle=False, axes_y=(0.2, 0.8), show_source=True,
+                             bottom_margin=BOTTOM_MARGIN)

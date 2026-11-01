@@ -242,3 +242,20 @@ Decided by the user (2026-11-01): run commands for `forecast_enrollment_report.p
 ## Report figure scripts reproduce the report PNGs (2026-11-01)
 
 Decided by the user (2026-11-01): the committed `forecast_enrollment_report.png` and `forecast_cost_table.png` could not be reproduced from their scripts. `plot_forecast_enrollment.py` now keeps the headline title (`Enrollment in Arizona's Private School Voucher Program Could Reach ...`) and its command line puts the notes before the sources line. `plot_forecast_cost_table.py` called from the command line now adds the `ESA Voucher Cost Forecasts` title and the sources line, centres the header on the figure, and uses a 6.5 x 8.05 in figure so the notes fit. The slide (`plot_forecast_slide.py`) still uses the function defaults and is unchanged. Both PNGs regenerated; values unchanged.
+
+## Full pipeline rebuild from raw data (2026-11-01)
+
+Requested by the user (2026-11-01): make the whole pipeline replicable from `data/raw/`.
+- Added `data_cleaning/extract_population_real.py`. It builds `az_pop_real_extracted.csv` from the three OEO "5 year groups" workbooks (2023-2025), using the first "Arizona" row in each. Before this, no script produced that file. The output matches the committed file byte for byte, and a new test (`tests/test_extract_population_real.py`) checks this.
+- Added `run_all.py`, which runs every step from extraction to the report figures in order. README and CLAUDE.md now say to use `uv sync --locked`.
+- Regenerated `az_pop_real_clean.csv`. Values are unchanged; two ratios lost a trailing zero (`0.191190` became `0.19119`, `0.187670` became `0.18767`) because pandas writes floats that way.
+- Regenerated `forecast_enrollment_report.png` and `forecast_cost_table.png`. The committed PNGs did not match their scripts as revised in the entry above. Values are unchanged.
+- After these changes, `run_all` reproduces every tracked file under `data/processed/` and `outputs/report/`, and a second run produces byte-identical PNGs.
+
+## Report figure bottom margins (2026-11-01)
+
+Requested by the user (2026-11-01): `forecast_enrollment_report.png` had too little space at the bottom, and `forecast_cost_table.png` had too much. Both report figures now save with 0.3 in below the lowest text (`BOTTOM_MARGIN`), so the image height follows the content. The cost table also places its notes 0.25 in below the lower table instead of 0.45 in (`TABLE_NOTES_GAP`). New sizes at 300 dpi: enrollment 2700x2138 (was 2700x2055), cost table 1950x2336 (was 1950x2415). The slide uses the function defaults and is unchanged. Values are unchanged.
+
+## Report panels come only from the standalone scripts (2026-11-01)
+
+Decided by the user (2026-11-01): `plot_forecast_slide.py --panels` and the standalone scripts both wrote `forecast_enrollment_report.png` and `forecast_cost_table.png`, with different titles and spacing, so whichever ran last set the report figures. The `--panels` option was removed. The standalone scripts (`plot_forecast_enrollment.py`, `plot_forecast_cost_table.py`) now produce these two files, including the headline enrollment title and the new bottom margins. The slide itself is unchanged.

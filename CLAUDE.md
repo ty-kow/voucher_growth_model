@@ -11,7 +11,7 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 - `outputs/`: generated files (graphs, analysis), no scripts; `report/` tracked in git, `draft/` git-ignored
   - `report/`: `report_data.csv`, `forecast.csv`, report figures
 - `src/voucher_growth_model/`: all code, including scripts that create graphs
-  - `data_cleaning/`: `extract_esa.py` (PDF to CSV), `clean_esa.py` (raw to clean CSV), `extract_population.py`, `clean_population_proj.py`, `clean_population_real.py`, `merge_population.py`, `make_report_data.py`
+  - `data_cleaning/`: `extract_esa.py` (PDF to CSV), `clean_esa.py` (raw to clean CSV), `extract_population.py`, `extract_population_real.py`, `clean_population_proj.py`, `clean_population_real.py`, `merge_population.py`, `make_report_data.py`
   - `forecast.py`: enrollment and cost forecast
   - `plots_report/plot_*.py`: scripts for the `outputs/report/` figures; self-contained
   - `plots_report/fonts/`: bundled Montserrat (OFL), loaded by the forecast plots
@@ -21,11 +21,12 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 - Root docs: `README.md`
 
 ## Commands
-- `uv sync`
+- `uv sync --locked`
+- `uv run --locked python -m voucher_growth_model.run_all` (rebuilds everything from `data/raw/`; steps below)
 - `uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/extracted/voucher_metrics_extracted.csv`
 - `uv run python -m voucher_growth_model.data_cleaning.make_report_data` (writes `outputs/report/report_data.csv`)
 - `uv run python -m voucher_growth_model.forecast outputs/report/report_data.csv outputs/report/forecast.csv`
-- `uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png --table --panels`
+- `uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png --table`
 - `uv run python -m voucher_growth_model.plots_report.plot_enrollment_actual outputs/report/report_data.csv outputs/report/enrollment_actual.png`
 - `uv run python -m voucher_growth_model.plots_report.plot_forecast_enrollment outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_enrollment_report.png`
 - `uv run python -m voucher_growth_model.plots_report.plot_forecast_cost_table outputs/report/forecast.csv outputs/report/forecast_cost_table.png`

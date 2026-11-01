@@ -10,6 +10,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
+from matplotlib.transforms import Bbox
 from matplotlib.ticker import MultipleLocator
 import pandas as pd
 
@@ -42,6 +43,7 @@ NOTES_CLEARANCE = 0.45  # inches from the plot area's bottom edge to the top of 
 FIG_HEIGHT = 6.85  # inches
 SAVE_DPI = 300
 SOURCE_GAP = 0.12  # inches between the notes and a sources line placed below them
+BOTTOM_MARGIN = 0.3  # inches below the lowest text in the report figures
 PANEL_TITLE_TOP, PANEL_TITLE_FONTSIZE = 0.08, 16  # inches from the top edge; points
 SUBTITLE_LINE_HEIGHT = 0.167  # inches per subtitle line at 10 pt
 LINE_LABEL_Y = 0.42  # axes fraction at which the vertical line labels are centred
@@ -57,7 +59,8 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
                              show_title: bool = True, subtitle_top: float = 0.72,
                              center_subtitle: bool = False, show_source: bool = True,
                              reserve_note_lines: int = 0, panel_title: str | None = None,
-                             subtitle_fontsize: float = 10, source_below_notes: bool = False) -> tuple[float, float]:
+                             subtitle_fontsize: float = 10, source_below_notes: bool = False,
+                             bottom_margin: float | None = None) -> tuple[float, float]:
     """subtitle_wrap re-wraps the subtitle to that many characters per line; None keeps its hand-set line breaks.
 
     show_title=False omits the title; the plot area then starts just below the subtitle, which sits subtitle_top inches
@@ -166,11 +169,21 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
         if panel_title_text:
             panel_title_text.set_x((pos.x0 + pos.x1) / 2)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path, dpi=SAVE_DPI)
+    fig.savefig(out_path, dpi=SAVE_DPI, bbox_inches=bottom_bbox(fig, bottom_margin))
     return pos.y0, pos.y1
+
+
+def bottom_bbox(fig, margin: float | None):
+    """Full-width save box whose bottom edge sits `margin` inches below the lowest text; None keeps the figure size."""
+    if margin is None:
+        return None
+    fig.canvas.draw()
+    lowest = min(t.get_window_extent().y0 for t in fig.texts) / fig.dpi
+    w, h = fig.get_size_inches()
+    return Bbox([[0, lowest - margin], [w, h]])
 
 
 if __name__ == "__main__":
     # Report figure: notes first, sources line below them
     plot_forecast_enrollment(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), show_source=False,
-                             source_below_notes=True)
+                             source_below_notes=True, bottom_margin=BOTTOM_MARGIN)

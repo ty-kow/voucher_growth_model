@@ -1,7 +1,7 @@
 """Enrollment and cost forecast charts side by side on one 16:9 canvas under a single title.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.plots_report.plot_forecast_slide <report_data> <forecast_csv> <out_png> [--table] [--panels]
+    uv run python -m voucher_growth_model.plots_report.plot_forecast_slide <report_data> <forecast_csv> <out_png> [--table]
 """
 
 import sys
@@ -37,18 +37,12 @@ SOURCE = ("Sources: Arizona Department of Education for ESA data, "
 # The cost subtitle has two lines to the enrollment subtitle's three; drop it half a line so their centres match
 SUBTITLE_LINE_HEIGHT = 0.167  # inches at 10 pt
 COST_SUBTITLE_TOP = PANEL["subtitle_top"] + (3 - 2) / 2 * SUBTITLE_LINE_HEIGHT
-PANEL_FILES = ("forecast_enrollment_report.png", "forecast_cost_table.png")  # left, right
-# Standalone report panels only; the slide keeps PANEL_TITLES and its wraps
-REPORT_ENROLLMENT_TITLE, REPORT_COST_TITLE = "ESA Voucher Enrollment Forecasts", "ESA Voucher Cost Forecasts"
-# None keeps SUBTITLE's hand-set breaks (line 2 starts at "after"); three lines that fit the figure width
-REPORT_SUBTITLE_WRAP, REPORT_SUBTITLE_FONTSIZE = None, 11
 COST_TITLE =";\nCost Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B"
 
 
-def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, table: bool = False,
-                        panels: bool = False) -> None:
-    """table=True replaces the cost bar chart with a table of FY46 costs. panels=True also saves each panel on its own
-    next to out_path (PANEL_FILES)."""
+def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, table: bool = False) -> None:
+    """table=True replaces the cost bar chart with a table of FY46 costs. The standalone report panels come from
+    plot_forecast_enrollment.py and plot_forecast_cost_table.py."""
     cost_panel = plot_forecast_cost_table if table else plot_forecast_cost
     with tempfile.TemporaryDirectory() as tmp:
         left, right = Path(tmp) / "enrollment.png", Path(tmp) / "cost.png"
@@ -61,15 +55,6 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, t
         panel = panel if table else {**PANEL, "subtitle_top": COST_SUBTITLE_TOP}
         cost_panel(forecast_csv, right, axes_y=axes_y, **panel, **{**COST, **right_extra})  # panel level with the line graph
         images = [Image.open(p).convert("RGB") for p in (left, right)]
-    if panels:  # standalone panels for the written report; the cost panel is redrawn centred and with sources
-        plot_forecast_enrollment(voucher_csv, forecast_csv, out_path.parent / PANEL_FILES[0],
-                                 **{**panel, "source_below_notes": True, "center_subtitle": False,
-                                    "subtitle_fontsize": REPORT_SUBTITLE_FONTSIZE},
-                                 **{**ENROLLMENT, **left_extra, "panel_title": REPORT_ENROLLMENT_TITLE,
-                                    "subtitle_wrap": REPORT_SUBTITLE_WRAP})
-        cost_panel(forecast_csv, out_path.parent / PANEL_FILES[1], axes_y=axes_y,
-                   **{**panel, "center_subtitle": False, "show_source": True},
-                   **{**COST, **right_extra, "panel_title": REPORT_COST_TITLE})
     gap = round(TITLE_GAP * SAVE_DPI)
     canvas = Image.new("RGB", (sum(im.width for im in images), max(im.height for im in images) + gap), "white")
     x = 0
@@ -94,5 +79,4 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, t
 
 
 if __name__ == "__main__":
-    plot_forecast_slide(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), table="--table" in sys.argv[4:],
-                        panels="--panels" in sys.argv[4:])
+    plot_forecast_slide(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), table="--table" in sys.argv[4:])

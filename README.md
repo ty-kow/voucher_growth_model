@@ -13,8 +13,16 @@ Population: Arizona Office of Economic Opportunity (OEO), [population projection
 
 ## Usage
 
+Rebuild every generated file from `data/raw/` (uses the exact versions in `uv.lock`):
+
 ```
-uv sync
+uv sync --locked
+uv run --locked python -m voucher_growth_model.run_all
+```
+
+Individual steps:
+
+```
 uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/extracted/voucher_metrics_extracted.csv
 ```
 
@@ -25,6 +33,7 @@ Other pipeline steps (`src/voucher_growth_model/data_cleaning/`):
 ```
 uv run python -m voucher_growth_model.data_cleaning.clean_esa <raw_csv> <clean_csv>
 uv run python -m voucher_growth_model.data_cleaning.extract_population <xlsx> <out_csv>
+uv run python -m voucher_growth_model.data_cleaning.extract_population_real <out_csv> <xlsx> [<xlsx> ...]
 uv run python -m voucher_growth_model.data_cleaning.clean_population_proj <raw_csv> <clean_csv>
 uv run python -m voucher_growth_model.data_cleaning.clean_population_real <raw_csv> <clean_csv>
 uv run python -m voucher_growth_model.data_cleaning.merge_population <real_clean> <proj_clean> <out_csv>
@@ -40,7 +49,7 @@ uv run python -m voucher_growth_model.forecast outputs/report/report_data.csv ou
 Report figures (run from the repo root; write to `outputs/report/`):
 
 ```
-uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png --table --panels
+uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png --table
 uv run python -m voucher_growth_model.plots_report.plot_enrollment_actual outputs/report/report_data.csv outputs/report/enrollment_actual.png
 uv run python -m voucher_growth_model.plots_report.plot_forecast_enrollment outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_enrollment_report.png
 uv run python -m voucher_growth_model.plots_report.plot_forecast_cost_table outputs/report/forecast.csv outputs/report/forecast_cost_table.png
