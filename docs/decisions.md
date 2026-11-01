@@ -259,3 +259,7 @@ Requested by the user (2026-11-01): `forecast_enrollment_report.png` had too lit
 ## Report panels come only from the standalone scripts (2026-11-01)
 
 Decided by the user (2026-11-01): `plot_forecast_slide.py --panels` and the standalone scripts both wrote `forecast_enrollment_report.png` and `forecast_cost_table.png`, with different titles and spacing, so whichever ran last set the report figures. The `--panels` option was removed. The standalone scripts (`plot_forecast_enrollment.py`, `plot_forecast_cost_table.py`) now produce these two files, including the headline enrollment title and the new bottom margins. The slide itself is unchanged.
+
+## Bar-chart cost panel moved to drafts (2026-11-01)
+
+Decided by the user (2026-11-01): `plot_forecast_cost.py` (cost bar chart) fed no report figure, so it moved from `plots_report/` to `plots_drafts/`. `plot_forecast_slide.py` imported it for the non-table variant and for its scenario list; the slide now always uses the cost table (the `--table` flag was removed) and takes its headline cost range from every FY46 cell of that table.

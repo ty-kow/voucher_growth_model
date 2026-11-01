@@ -1,7 +1,7 @@
 """Enrollment and cost forecast charts side by side on one 16:9 canvas under a single title.
 
 Usage (from the repo root):
-    uv run python -m voucher_growth_model.plots_report.plot_forecast_slide <report_data> <forecast_csv> <out_png> [--table]
+    uv run python -m voucher_growth_model.plots_report.plot_forecast_slide <report_data> <forecast_csv> <out_png>
 """
 
 import sys
@@ -13,8 +13,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-from voucher_growth_model.plots_report.plot_forecast_cost import SCENARIOS, plot_forecast_cost
-from voucher_growth_model.plots_report.plot_forecast_cost_table import plot_forecast_cost_table
+from voucher_growth_model.plots_report.plot_forecast_cost_table import ROWS, plot_forecast_cost_table
 from voucher_growth_model.plots_report.plot_forecast_enrollment import SAVE_DPI, TITLE as ENROLLMENT_TITLE, plot_forecast_enrollment
 
 CANVAS_SIZE = (16, 9)  # inches
@@ -25,7 +24,7 @@ ENROLLMENT = dict(figsize=(9.5, PANEL_HEIGHT), subtitle_wrap=112, notes_wrap=145
 COST = dict(figsize=(6.5, PANEL_HEIGHT), subtitle_wrap=68, notes_wrap=104)  # same height, so plot areas can line up
 TITLE_FONTSIZE = 22  # the largest size that keeps each of the two title lines inside the canvas
 PANEL = dict(show_title=False, subtitle_top=0.15, center_subtitle=True, show_source=False)  # one slide title, one sources line
-PANEL_TITLES = ("Enrollment Forecasts", "Cost Forecasts")  # table variant only: left, right
+PANEL_TITLES = ("Enrollment Forecasts", "Cost Forecasts")  # left, right
 TITLED_SUBTITLE_TOP = 0.6  # inches, leaves room above the subtitles for the panel titles
 TITLED_SUBTITLE_FONTSIZE = 12
 # Subtitle wraps (characters per line) at that size: the left one stays within the line graph's plot area (about 9.8 in
@@ -34,26 +33,19 @@ LEFT_TABLE_WRAP = dict(subtitle_wrap=84)
 RIGHT_TABLE_WRAP = dict(subtitle_wrap=56)
 SOURCE = ("Sources: Arizona Department of Education for ESA data, "
           "Arizona Office of Economic Opportunity for population data")
-# The cost subtitle has two lines to the enrollment subtitle's three; drop it half a line so their centres match
-SUBTITLE_LINE_HEIGHT = 0.167  # inches at 10 pt
-COST_SUBTITLE_TOP = PANEL["subtitle_top"] + (3 - 2) / 2 * SUBTITLE_LINE_HEIGHT
 COST_TITLE =";\nCost Could Reach \\${lo:,.1f}B to \\${hi:,.1f}B"
 
 
-def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, table: bool = False) -> None:
-    """table=True replaces the cost bar chart with a table of FY46 costs. The standalone report panels come from
-    plot_forecast_enrollment.py and plot_forecast_cost_table.py."""
-    cost_panel = plot_forecast_cost_table if table else plot_forecast_cost
+def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path) -> None:
+    """The standalone report panels come from plot_forecast_enrollment.py and plot_forecast_cost_table.py."""
     with tempfile.TemporaryDirectory() as tmp:
         left, right = Path(tmp) / "enrollment.png", Path(tmp) / "cost.png"
-        # The table variant heads each side with a title, so its subtitles start lower, level with each other; the bar
-        # variant centres the cost subtitle on the enrollment subtitle instead
-        panel = {**PANEL, "subtitle_top": TITLED_SUBTITLE_TOP, "subtitle_fontsize": TITLED_SUBTITLE_FONTSIZE} if table else PANEL
-        left_extra = dict(panel_title=PANEL_TITLES[0], **LEFT_TABLE_WRAP) if table else {}
-        right_extra = dict(panel_title=PANEL_TITLES[1], **RIGHT_TABLE_WRAP) if table else {}
-        axes_y = plot_forecast_enrollment(voucher_csv, forecast_csv, left, **panel, **{**ENROLLMENT, **left_extra})
-        panel = panel if table else {**PANEL, "subtitle_top": COST_SUBTITLE_TOP}
-        cost_panel(forecast_csv, right, axes_y=axes_y, **panel, **{**COST, **right_extra})  # panel level with the line graph
+        # Each side has a title, so the subtitles start lower, level with each other
+        panel = {**PANEL, "subtitle_top": TITLED_SUBTITLE_TOP, "subtitle_fontsize": TITLED_SUBTITLE_FONTSIZE}
+        axes_y = plot_forecast_enrollment(voucher_csv, forecast_csv, left, **panel,
+                                          **{**ENROLLMENT, "panel_title": PANEL_TITLES[0], **LEFT_TABLE_WRAP})
+        plot_forecast_cost_table(forecast_csv, right, axes_y=axes_y, **panel,
+                                 **{**COST, "panel_title": PANEL_TITLES[1], **RIGHT_TABLE_WRAP})  # level with the line graph
         images = [Image.open(p).convert("RGB") for p in (left, right)]
     gap = round(TITLE_GAP * SAVE_DPI)
     canvas = Image.new("RGB", (sum(im.width for im in images), max(im.height for im in images) + gap), "white")
@@ -66,7 +58,7 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, t
     f46 = f[f["fy"] == "FY46"]
     enroll = f46["enroll"].drop_duplicates() / 1e3
     cost = [f46[(f46["takeup_scenario"] == k) & (f46["voucher_scenario"] == v)]["cost_real_fy26"].iloc[0] / 1e9
-            for k, v, _, _ in SCENARIOS]
+            for k, _ in ROWS for v in ("infl2", "hist")]  # every cell of the FY46 table
     title = (ENROLLMENT_TITLE.format(lo=enroll.min(), hi=enroll.max()).replace("\n", " ")
              + COST_TITLE.format(lo=min(cost), hi=max(cost)))
 
@@ -79,4 +71,4 @@ def plot_forecast_slide(voucher_csv: Path, forecast_csv: Path, out_path: Path, t
 
 
 if __name__ == "__main__":
-    plot_forecast_slide(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), table="--table" in sys.argv[4:])
+    plot_forecast_slide(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]))

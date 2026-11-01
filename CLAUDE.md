@@ -26,7 +26,7 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
 - `uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/extracted/voucher_metrics_extracted.csv`
 - `uv run python -m voucher_growth_model.data_cleaning.make_report_data` (writes `outputs/report/report_data.csv`)
 - `uv run python -m voucher_growth_model.forecast outputs/report/report_data.csv outputs/report/forecast.csv`
-- `uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png --table`
+- `uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png`
 - `uv run python -m voucher_growth_model.plots_report.plot_enrollment_actual outputs/report/report_data.csv outputs/report/enrollment_actual.png`
 - `uv run python -m voucher_growth_model.plots_report.plot_forecast_enrollment outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_enrollment_report.png`
 - `uv run python -m voucher_growth_model.plots_report.plot_forecast_cost_table outputs/report/forecast.csv outputs/report/forecast_cost_table.png`

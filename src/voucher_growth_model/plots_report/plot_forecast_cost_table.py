@@ -41,8 +41,7 @@ def plot_forecast_cost_table(forecast_csv: Path, out_path: Path, figsize: tuple[
                              center_subtitle: bool = True, panel_title: str | None = None,
                              subtitle_fontsize: float = 10, show_source: bool = False,
                              bottom_margin: float | None = None, **_) -> None:
-    """Keyword arguments follow plot_forecast_cost so the slide can swap the two panels; extras are ignored.
-    center_subtitle=False centres the title, subtitle and FY26 line on the figure instead of the axes. show_source adds
+    """Extra keyword arguments are ignored. center_subtitle=False centres the title, subtitle and FY26 line on the figure instead of the axes. show_source adds
     the sources line below the notes."""
     f = pd.read_csv(forecast_csv)
     cost = f.set_index(["fy", "takeup_scenario", "voucher_scenario"])["cost_real_fy26"] / 1e9
