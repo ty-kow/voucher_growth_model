@@ -1,5 +1,16 @@
 # Decisions
 
+## Current forecast specification (summary, 2026-11-01)
+
+Detail and history are in the entries below; entries marked "superseded" are kept as a record.
+
+- Inputs: `outputs/report/report_data.csv` (Q3 value per fiscal year, FY21-FY26; population aged 5-19 from 2023).
+- Enrollment = take-up x population aged 5-19. Take-up follows a logistic path to a ceiling of 9.9% (best fit), 20%, 30% or 40%, anchored at FY26 actual take-up (7.49%).
+- Shared rate r = 0.246: slope of log take-up on year, FY23-FY26.
+- Mean voucher grows from FY26 ($10,837.68) at 2%/yr or the FY24-FY26 rate (about 5.1%/yr).
+- Cost = enrollment x mean voucher; real values in FY26 dollars (2%/yr deflator).
+- Horizon FY26-FY46, annual; 4 x 2 = 8 scenarios. Output: `outputs/report/forecast.csv`.
+
 ## total_cost imputation
 
 Blank `total_cost` filled with `total_enroll * mean_voucher` where both inputs exist (user instruction; overrides the project no-imputation rule). Rows without `mean_voucher` (FY25Q1 onward) are not fillable and stay blank. Filled values are marked `*`.
@@ -120,7 +131,7 @@ Decided by the user (2026-10-29):
 
 Still open: how quarters become annual values, which population base to use, how take-up is forecast, how mean voucher is forecast.
 
-## Forecast method details
+## Forecast method details (partly superseded: take-up base is now pop_5_19, see "School-age (5-19) population version" and "report_data.csv")
 
 Decided by the user (2026-10-29):
 
@@ -129,7 +140,7 @@ Decided by the user (2026-10-29):
 - Take-up projection: scenario paths with a ceiling.
 - Mean voucher projection: scenario rates, including 2% inflation and the historical growth rate; any further scenarios are still open.
 
-## Forecast parameters
+## Forecast parameters (partly superseded: 3.5% scenario dropped, see "Take-up scenarios revised")
 
 Decided by the user (2026-10-29):
 
@@ -138,7 +149,7 @@ Decided by the user (2026-10-29):
 - Mean-voucher scenarios: 2% inflation, historical rate (FY24-FY26), high inflation (3.5%).
 - Take-up ceilings: fit a logistic curve to FY23-FY26 as a reference, then the user picks the ceilings.
 
-## Take-up scenarios
+## Take-up scenarios (superseded: total-population base removed, see "report_data.csv")
 
 Decided by the user (2026-10-29): take-up ceilings of 1.44% (logistic best fit to FY23-FY26), 3%, 5% and 10%. Each path approaches its ceiling at the fitted rate (r = 0.797/yr). Logistic fit: K = 0.0144 (s.e. 0.0016), r = 0.797, t0 = 0.146 (t = 0 at FY23); fixed ceilings from 1.5% to 10% fit almost as well (4 data points).
 
@@ -148,7 +159,7 @@ Anchor: each logistic path is re-centred (t0 solved) so it passes through FY26 a
 
 Decided by the user (2026-10-29): forecast runs FY27-FY46 (later changed to start at FY26, see "Forecast start year"); all 12 combinations (4 take-up paths x 3 mean-voucher rates); cost reported in nominal dollars and in real FY26 dollars (deflated at 2%/yr). Mean voucher grows from FY26 actual ($10,837.68). Cost = enrollment x mean voucher.
 
-## Take-up scenarios revised
+## Take-up scenarios revised (superseded: per-ceiling r replaced, see "Take-up rate (FY23-FY26 fit, all four years)")
 
 Decided by the user (2026-10-29), after reviewing the first forecast graph:
 
@@ -180,11 +191,11 @@ Decided by the user (2026-10-29): a second forecast using take-up = enrollment /
 
 Decided by the user (2026-10-29): forecast CSVs and graphs start at FY26 instead of FY27 (FY26-FY46, 21 years). The FY26 row is t = 0: take-up, enrollment and mean voucher equal the FY26 Q3 actuals, and cost is enrollment x mean voucher (not the reported FY26 cost). Applies to both population bases; all other choices unchanged.
 
-## Take-up rate (common r)
+## Take-up rate (common r) (superseded, see "Take-up rate (FY23-FY26 fit, all four years)")
 
 Decided by the user (2026-10-29): all ceilings within a population base share the logistic rate fitted to FY23-FY26 take-up, so FY27 differs by scenario. Total population: r = 0.797. Ages 5-19: r = 0.555. This replaces the rule that solved r per ceiling to match FY25-FY26 take-up growth ("Take-up scenarios revised" and the 5-19 "Rates" line); ceilings and the FY26 anchor are unchanged. `rate_matching_growth` was removed from `forecast.py`.
 
-## Take-up rate (FY23-FY26 growth)
+## Take-up rate (FY23-FY26 growth) (superseded, see "Take-up rate (FY23-FY26 fit, all four years)")
 
 Decided by the user (2026-10-29): the shared logistic rate r is now the continuous annual growth rate of take-up, r = ln(FY26 take-up / FY23 take-up) / 3, computed in `forecast.py` for each population base. Total population: r = 0.228. Ages 5-19: r = 0.255. This replaces the fixed fitted rates (0.797 / 0.555). The user asked for FY22-FY26, but population data starts in 2023, so FY22 take-up cannot be computed without imputing a 2022 population; FY23 was chosen as the start (user's choice). Ceilings, the FY26 anchor and mean-voucher scenarios are unchanged.
 
@@ -206,9 +217,28 @@ Update (2026-10-29, user): `pop_total` removed from `report_data.csv` (columns n
 
 ## Universal expansion timing and enrollment graphic (2026-10-29)
 
-Decided by the user (2026-10-29): universal expansion began in Q1 2023 (FY23Q1). This confirms the "Universal counts" entry above (zeros through FY22Q4). `outputs/report/forecast_enrollment_report.png` was revised in the same session:
+Decided by the user (2026-10-29): universal expansion began in Q1 2023 (FY23Q1). This confirms the "total_universal and total_universal_sn zero-fill" entry above (zeros through FY22Q4). `outputs/report/forecast_enrollment_report.png` was revised in the same session:
 
 - The notes sentence about the FY23 expansion and FY21-FY22 take-up was removed. FY21-FY22 take-up is still absent from the forecast because population data starts in 2023.
 - Scenario lines keep the original teal/orange/red/magenta colours and gain distinct dash patterns (dotted for 9.9%, dashed for 20%, dash-dot for 30%, long dash for 40%) so they stay separable in greyscale and for colour-blind readers. A blue ramp was tried and reverted. End values are labelled on each line.
 - The notes no longer state the shared rate (r = 0.246) or the four-point fit; both are recorded in "Take-up rate (FY23-FY26 fit, all four years)" above.
 - Other edits: title and subtitle reworded, the 9.9% scenario relabelled "Best-fit ceiling, 9.9%", legend order reversed, FY26 population-source flag added to the notes, x-axis labels shown as calendar years (2021, 2023, 2026, then every fifth year), x-axis title removed.
+
+## Report outputs and repo restructure (2026-11-01)
+
+Decided by the user (2026-11-01):
+
+- `outputs/final/` renamed to `outputs/report/`. `final_data.csv` renamed to `report_data.csv` and moved into it (built by `make_report_data.py`, renamed from `make_final_data.py`); `forecast_final.csv` renamed to `forecast.csv`. The draft forecast CSV is `outputs/draft/forecast/csv/forecast_draft.csv`.
+- Report figures in `outputs/report/`: `enrollment_actual.png` (FY21-FY26 Q3 actuals), `forecast_enrollment_report.png` and `forecast_cost_table.png` (standalone panels of the slide, with report titles and a sources line), `forecast_slide_report.png` (slide with the cost tables).
+- Earlier final graphs (`forecast_cost_final`, `forecast_cost_scenarios_final`, `forecast_enrollment_final`, `forecast_table`, first slide) moved to `outputs/draft/forecast/`.
+- Report figure scripts moved to `src/voucher_growth_model/plots_report/` and made self-contained (fonts and `plot_forecast_cost.py` moved in). Draft scripts folder renamed `plots/` to `plots_drafts/`.
+- `outputs/draft/` and `plots_drafts/` are git-ignored and removed from the git index; files remain local.
+- Report text: `docs/report_outline.md` (skeleton) and `docs/report_draft.md` (draft).
+
+## Replication docs (2026-11-01)
+
+Decided by the user (2026-11-01): run commands for `forecast_enrollment_report.png` and `forecast_cost_table.png` added to `README.md` and `CLAUDE.md`. `.python-version` added (`3.15`) to pin the interpreter used by uv. No data or outputs changed.
+
+## Report figure scripts reproduce the report PNGs (2026-11-01)
+
+Decided by the user (2026-11-01): the committed `forecast_enrollment_report.png` and `forecast_cost_table.png` could not be reproduced from their scripts. `plot_forecast_enrollment.py` now keeps the headline title (`Enrollment in Arizona's Private School Voucher Program Could Reach ...`) and its command line puts the notes before the sources line. `plot_forecast_cost_table.py` called from the command line now adds the `ESA Voucher Cost Forecasts` title and the sources line, centres the header on the figure, and uses a 6.5 x 8.05 in figure so the notes fit. The slide (`plot_forecast_slide.py`) still uses the function defaults and is unchanged. Both PNGs regenerated; values unchanged.

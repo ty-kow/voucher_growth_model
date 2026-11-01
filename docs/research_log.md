@@ -1,6 +1,6 @@
 # Research Log
 
-Project: forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports (FY21Q2-FY26Q4). Modelling method not yet chosen.
+Project: forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports (FY21Q2-FY26Q4). Method chosen: logistic take-up scenarios on the population aged 5-19 (see "Report (2026-11-01)" below and `decisions.md`).
 
 ## Data extraction
 
@@ -60,18 +60,18 @@ Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns:
 - In practice more complicated. Students tend to leave the program before grade 9. This is a qualitative claim, not yet checked against data.
 
 **Naive program growth.**
-- 4.08% per quarter in total enrollment (FY24Q1-FY26Q4, n = 12). Source: log-linear trend with quarter effects (`plots_drafts/plot_enrollment_seasonal_model.py`, `outputs/enrollment/enrollment_seasonal_model.png`); SE 0.0010 log points.
+- 4.08% per quarter in total enrollment (FY24Q1-FY26Q4, n = 12). Source: log-linear trend with quarter effects (`plots_drafts/plot_enrollment_seasonal_model.py`, `outputs/draft/enrollment/enrollment_seasonal_model.png`); SE 0.0010 log points.
 - Seasonal factors: Q1 0.999, Q2 1.019, Q3 1.022, Q4 0.961.
 - Caveat: 12 points, 5 parameters; each factor rests on three observations. Baseline for later models, not a forecast method.
 
 **Naive mean voucher growth.**
-- 1.1% per quarter (FY24Q1-FY26Q4, n = 12). Source: OLS linear trend (`plots_drafts/plot_mean_voucher_ols.py`, `outputs/mean_voucher/mean_voucher_ols.png`): slope $115.52 per quarter (SE $7.27, R² = 0.962), about 1.1% of the series mean ($10,266).
+- 1.1% per quarter (FY24Q1-FY26Q4, n = 12). Source: OLS linear trend (`plots_drafts/plot_mean_voucher_ols.py`, `outputs/draft/mean_voucher/mean_voucher_ols.png`): slope $115.52 per quarter (SE $7.27, R² = 0.962), about 1.1% of the series mean ($10,266).
 - Caveat: 12 points. FY25+ values are implied averages (cost / enrollment), not reported (see Data cleaning, step 2). Baseline for later models, not a forecast method.
 
 **Mean voucher seasonality.**
 - Decision: no seasonal adjustment of `mean_voucher`.
 - Rationale: mean voucher is driven by the composition of enrolled students. Entry and exit at the start or end of the year show no pattern in who joins or leaves, so there is no mechanism for a seasonal effect.
-- Check: log-linear trend with quarter effects (FY24Q1-FY26Q4, n = 12; `plots_drafts/plot_mean_voucher_seasonal_model.py`, `outputs/mean_voucher/mean_voucher_seasonal_model.png`) gives factors Q1 0.9998, Q2 1.0061, Q3 0.9990, Q4 0.9951, all within 0.6% of 1. Trend 1.15% per quarter (SE 0.0007 log points). Consistent with the rationale, though 12 points give little power.
+- Check: log-linear trend with quarter effects (FY24Q1-FY26Q4, n = 12; `plots_drafts/plot_mean_voucher_seasonal_model.py`, `outputs/draft/mean_voucher/mean_voucher_seasonal_model.png`) gives factors Q1 0.9998, Q2 1.0061, Q3 0.9990, Q4 0.9951, all within 0.6% of 1. Trend 1.15% per quarter (SE 0.0007 log points). Consistent with the rationale, though 12 points give little power.
 
 **Cost.**
 - Special needs cost is driven in large part by autism, which carries the highest award value.
@@ -89,16 +89,16 @@ Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns:
 Full parameter choices are in `decisions.md` (sections "Forecast scope" to "School-age (5-19) population version").
 
 **Data prep.**
-- Reorganized `data/processed/` into `raw/` and `clean/`; added population cleaning scripts (`clean_population_proj.py`, `clean_population_real.py`) and `plots_drafts/plot_pop_proj.py`.
+- Reorganized `data/processed/` into `raw/` (since renamed `extracted/`) and `clean/`; added population cleaning scripts (`clean_population_proj.py`, `clean_population_real.py`) and `plots_drafts/plot_pop_proj.py`.
 - Merged real (2023-2025) and projected (2026-2046) population into `data/processed/clean/az_pop_all_clean.csv` (`merge_population.py`), columns `pop_total`, `pop_5_19`, `source`. Caveat: sources differ, so a level shift at 2025/2026 is possible.
 
 **Method.** `src/voucher_growth_model/forecast.py`, annual FY26-FY46 (the FY26 row reproduces actuals).
 - Enrollment = take-up x population. Take-up = Q3 enrollment / population in the same calendar year (FY26Q3 pairs with 2026).
-- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share r = continuous annual growth rate of take-up, fitted to FY23-FY26 (slope of log take-up on year, all four years; 5-19 r = 0.246). It was first the endpoint rate ln(FY26 / FY23) / 3 (total r = 0.228; 5-19 r = 0.255), which ignored FY24 and FY25. Scenarios diverge from FY27. FY22 would need a 2022 population, which the data does not have.
+- Take-up follows a logistic path to a ceiling, re-centred through FY26 actual take-up. All ceilings in a base share r = continuous annual growth rate of take-up, fitted to FY23-FY26 (slope of log take-up on year, all four years; 5-19 r = 0.246). It was first the endpoint rate (superseded) ln(FY26 / FY23) / 3 (total r = 0.228; 5-19 r = 0.255), which ignored FY24 and FY25. Scenarios diverge from FY27. FY22 would need a 2022 population, which the data does not have.
 - Cost = enrollment x mean voucher. Mean voucher grows from FY26 ($10,837.68) at 2% or the FY24-FY26 compound rate (about 5.1%/yr). Cost is reported in real FY26 dollars (2%/yr deflator) on the graph; the CSV also holds nominal.
 
 **Scenarios.**
-- Total population base: take-up 1.32% in FY26. Logistic fit to FY23-FY26 gives K = 1.44% (s.e. 0.16pp), r = 0.797. Ceilings 1.44%, 2%, 3%, 5% (10% dropped after the first graph, about 917k students by FY46).
+- Total population base (superseded: removed, only the 5-19 base is used; see `decisions.md`, "report_data.csv"): take-up 1.32% in FY26. Logistic fit to FY23-FY26 gives K = 1.44% (s.e. 0.16pp), r = 0.797. Ceilings 1.44%, 2%, 3%, 5% (10% dropped after the first graph, about 917k students by FY46).
 - 5-19 population base (separate outputs `forecast_5_19.*`): take-up FY23 3.48%, FY24 5.15%, FY25 6.05%, FY26 7.49%. Logistic fit K = 9.9% (s.e. 3.5pp), r = 0.555. Ceilings 9.9%, 20%, 30%, 40%.
 - Grid: 4 take-up paths x 2 mean-voucher rates = 8 per base.
 
@@ -128,3 +128,19 @@ Question: which grade's enrollment trend matches total enrollment (`total_enroll
 **Caveats.**
 - Confidence: high on computed values; differences among grades 5, 6 and 9 are small and not statistically distinguishable at n = 16.
 - Correlations measure co-movement, not equal growth; cumulative growth differs by grade (grade 11 261%, grade 3 248%, grade 8 205% from FY23Q1).
+
+## Report (2026-11-01)
+
+**Final specification.** Population aged 5-19 base only; take-up ceilings 9.9% (logistic best fit), 20%, 30%, 40%; shared r = 0.246; mean voucher growth 2% or 5.1%/yr; FY26-FY46; cost in real FY26 dollars. Summary at the top of `decisions.md`.
+
+**Headline results** (`outputs/report/forecast.csv`). FY46 enrollment 134,648 to 528,533. FY46 real cost $1.5B to $10.4B; FY36 $1.3B to $5.5B. The take-up ceiling drives more of the spread than voucher growth.
+
+**Report materials.**
+- Text: `docs/report_outline.md` (skeleton), `docs/report_draft.md` (draft, ~1,500 words).
+- Figures in `outputs/report/`: `enrollment_actual.png`, `forecast_enrollment_report.png`, `forecast_cost_table.png`, `forecast_slide_report.png`; scripts in `src/voucher_growth_model/plots_report/`.
+
+**Open items.**
+- FLAG on the 9.9% ceiling line (its s.e. of 3.5pp rests on four points).
+- Policy implications section flagged for revision.
+- Note on the two report types (Executive & Legislative vs. SBE) still to write.
+- Reference URLs for ADE reports and HB 2853; AI use statement.

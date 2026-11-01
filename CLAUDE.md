@@ -1,33 +1,41 @@
 # Voucher Growth Model
 
-Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports. enrollment drivers feed a cost projection. Modelling method is undecided; validate extraction first.
+Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports. Enrollment drivers feed a cost projection. Method is set: logistic take-up scenarios on the population aged 5-19 (see `docs/decisions.md`). Current stage: the written report (`docs/report_draft.md`).
 
 ## Layout
 - `data/raw/voucher_reports/`: source PDFs (FY21Q2-FY26Q4), tracked in git
+- `data/raw/population/`: OEO population workbooks, tracked in git
 - `data/processed/`: generated, tracked in git; changes logged in `docs/decisions.md`
   - `extracted/`: extractor output (`voucher_metrics_extracted.csv`, `az_pop_proj_extracted.csv`, `az_pop_real_extracted.csv`)
-  - `clean/`: cleaned files (`voucher_metrics_clean.csv`, `az_pop_real_clean.csv`)
+  - `clean/`: cleaned files (`voucher_metrics_clean.csv`, `az_pop_proj_clean.csv`, `az_pop_real_clean.csv`, `az_pop_all_clean.csv`)
 - `outputs/`: generated files (graphs, analysis), no scripts; `report/` tracked in git, `draft/` git-ignored
+  - `report/`: `report_data.csv`, `forecast.csv`, report figures
 - `src/voucher_growth_model/`: all code, including scripts that create graphs
   - `data_cleaning/`: `extract_esa.py` (PDF to CSV), `clean_esa.py` (raw to clean CSV), `extract_population.py`, `clean_population_proj.py`, `clean_population_real.py`, `merge_population.py`, `make_report_data.py`
   - `forecast.py`: enrollment and cost forecast
-  - `plots_drafts/plot_*.py` (git-ignored): draft graph scripts; run from the repo root, write to `outputs/`
+  - `plots_report/plot_*.py`: scripts for the `outputs/report/` figures; self-contained
   - `plots_report/fonts/`: bundled Montserrat (OFL), loaded by the forecast plots
-  - `plots_report/plot_*.py`: scripts for the `outputs/report/` report figures (`plot_forecast_slide --table --panels`, `plot_enrollment_actual`)
+  - `plots_drafts/plot_*.py` (git-ignored): draft graph scripts; run from the repo root, write to `outputs/`
 - `tests/`: pytest tests
-- `docs/`: `decisions.md`, `research_log.md`
+- `docs/`: `decisions.md`, `research_log.md`, `data_dictionary.md`, `report_outline.md`, `report_draft.md`
 - Root docs: `README.md`
 
 ## Commands
 - `uv sync`
 - `uv run python -m voucher_growth_model.data_cleaning.extract_esa data/raw/voucher_reports data/processed/extracted/voucher_metrics_extracted.csv`
+- `uv run python -m voucher_growth_model.data_cleaning.make_report_data` (writes `outputs/report/report_data.csv`)
+- `uv run python -m voucher_growth_model.forecast outputs/report/report_data.csv outputs/report/forecast.csv`
+- `uv run python -m voucher_growth_model.plots_report.plot_forecast_slide outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_slide_report.png --table --panels`
+- `uv run python -m voucher_growth_model.plots_report.plot_enrollment_actual outputs/report/report_data.csv outputs/report/enrollment_actual.png`
+- `uv run python -m voucher_growth_model.plots_report.plot_forecast_enrollment outputs/report/report_data.csv outputs/report/forecast.csv outputs/report/forecast_enrollment_report.png`
+- `uv run python -m voucher_growth_model.plots_report.plot_forecast_cost_table outputs/report/forecast.csv outputs/report/forecast_cost_table.png`
 
 ## Conventions
 - Use uv only; no pip.
 - Scripts go in `src/voucher_growth_model/`, not `outputs/`.
 - Add tests for any extraction change (pytest, text fixtures from PDFs).
 - Never edit files in `data/raw/`; confirm before touching them.
-- Missing values stay blank/N/A. Never impute or guess.
+- Missing values stay blank/N/A. Never impute or guess unless the user instructs it; log every fill in `docs/decisions.md`.
 
 ## Data caveats
 - FY21Q2-FY23Q3 reports are a legacy format: a single disability row covers all students (`legacy_sn` flag).

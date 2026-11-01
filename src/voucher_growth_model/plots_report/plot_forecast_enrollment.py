@@ -171,4 +171,6 @@ def plot_forecast_enrollment(voucher_csv: Path, forecast_csv: Path, out_path: Pa
 
 
 if __name__ == "__main__":
-    plot_forecast_enrollment(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]))
+    # Report figure: notes first, sources line below them
+    plot_forecast_enrollment(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), show_source=False,
+                             source_below_notes=True)

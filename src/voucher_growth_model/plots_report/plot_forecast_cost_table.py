@@ -127,4 +127,7 @@ def plot_forecast_cost_table(forecast_csv: Path, out_path: Path, figsize: tuple[
 
 
 if __name__ == "__main__":
-    plot_forecast_cost_table(Path(sys.argv[1]), Path(sys.argv[2]))
+    # Report figure: own title and sources line, taller than the slide panel so the notes fit
+    plot_forecast_cost_table(Path(sys.argv[1]), Path(sys.argv[2]), figsize=(6.5, 8.05),
+                             panel_title="ESA Voucher Cost Forecasts", subtitle_top=0.5, subtitle_fontsize=12,
+                             subtitle_wrap=50, center_subtitle=False, axes_y=(0.2, 0.8), show_source=True)
