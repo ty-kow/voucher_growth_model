@@ -1,6 +1,6 @@
 # Voucher Growth Model
 
-Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports. Enrollment drivers feed a cost projection. Method is set: logistic take-up scenarios on the population aged 5-19 (see `docs/decisions.md`).
+Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state reports. Enrollment drivers feed a cost projection. Method is set: logistic take-up scenarios on the population aged 5-19 (see `docs/decisions.md`). Current stage: the written report (`docs/report_draft.md`).
 
 ## Layout
 - `data/raw/voucher_reports/`: source PDFs (FY21Q2-FY26Q4), tracked in git
@@ -15,8 +15,9 @@ Forecast Arizona ESA (voucher) enrollment and program cost from quarterly state 
   - `forecast.py`: enrollment and cost forecast
   - `plots_report/plot_*.py`: scripts for the `outputs/report/` figures; self-contained
   - `plots_report/fonts/`: bundled Montserrat (OFL), loaded by the forecast plots
+  - `plots_drafts/plot_*.py`: draft graph scripts; run from the repo root, write to `outputs/`
 - `tests/`: pytest tests
-- `docs/`: `decisions.md`, `research_log.md`, `data_dictionary.md`
+- `docs/`: `decisions.md`, `research_log.md`, `data_dictionary.md`; `report_outline.md` and `report_draft.md` are git-ignored
 - Root docs: `README.md`
 
 ## Commands

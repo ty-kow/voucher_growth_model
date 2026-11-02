@@ -19,7 +19,7 @@ Conventions
 | Clean | `data/processed/clean/az_pop_real_clean.csv` | year |
 | Clean | `data/processed/clean/az_pop_all_clean.csv` | year |
 | Report | `outputs/report/report_data.csv` | fiscal year (Q3 values) |
-| Forecast | `outputs/report/forecast.csv` | fiscal year x scenario |
+| Forecast | `outputs/report/forecast.csv` (draft copy: `outputs/draft/forecast/csv/forecast_draft.csv`) | fiscal year x scenario |
 
 ## Voucher metrics (`voucher_metrics_extracted.csv`, `voucher_metrics_clean.csv`)
 
@@ -116,3 +116,4 @@ One row per fiscal year (FY26-FY46) x take-up scenario x voucher scenario: 21 x 
 | `cost_nominal` | dollars | `enroll x mean_voucher`. |
 | `cost_real_fy26` | dollars | `cost_nominal` deflated to FY26 dollars at 2%/yr. |
 
+The draft copy in `outputs/draft/forecast/csv/` is local only (git-ignored) and may differ from the report file (e.g. a different `r`).

@@ -167,7 +167,7 @@ Decided by the user (2026-10-29), after reviewing the first forecast graph:
 - Approach rate: for each ceiling, r is solved so FY27 take-up grows by the FY25-FY26 take-up growth (16.1%). Resulting r: 2% = 0.520, 3% = 0.283, 5% = 0.208.
 - 1.44% cannot grow 16.1% without passing its ceiling, so it keeps the fitted r = 0.797.
 
-Forecast graph (2026-10-29, user): cost shown in real FY26 dollars only; Q3 actuals deflated at the same 2%/yr.
+Forecast graph (2026-10-29, user): cost shown in real FY26 dollars only; Q3 actuals deflated at the same 2%/yr. `outputs/draft/forecast/csv/forecast_draft.csv` still holds both nominal and real cost.
 
 Mean-voucher scenarios (2026-10-29, user): 3.5% high-inflation scenario dropped. Remaining: 2% inflation and historical FY24-FY26 rate; grid is now 4 x 2 = 8.
 
@@ -184,6 +184,8 @@ Decided by the user (2026-10-29): a second forecast using take-up = enrollment /
 ## Project setup and plots (2026-10-29)
 
 - `pyproject.toml`: added a hatchling build system with `src/voucher_growth_model` as the wheel package, so `uv run python -m voucher_growth_model.<module>` imports the package. `uv.lock` updated.
+- `plots_drafts/plot_pop_proj.py`: y-axis now starts at 0 so population changes are not visually exaggerated.
+- `plots_drafts/plot_pop_all.py` (`outputs/population/pop_all.png`): plots the merged real and projected series from `az_pop_all_clean.csv`.
 
 ## Forecast start year
 
@@ -207,7 +209,7 @@ Decided by the user (2026-10-29): `data/processed/raw/` renamed to `data/process
 
 ## report_data.csv (2026-10-29)
 
-Decided by the user (2026-10-29): `outputs/report/report_data.csv` is built by `data_cleaning/make_report_data.py` from `voucher_metrics_clean.csv`. It keeps `mean_voucher`, `total_cost` and `total_enroll` for the Q3 report of each fiscal year only (FY21Q3 to FY26Q3, 6 rows); the other quarters are dropped. The `quarter` column is renamed `year` and holds the fiscal year (`FY21` to `FY26`); each value is the Q3 value for that year. No values altered. `forecast.py` now reads this file (column `year`) and no longer filter for Q3; the Q3 choice is unchanged from "Forecast method details" ("Annual value: each fiscal year's Q3 report") and now applies through this file. All forecast inputs from this file are Q3 values. They no longer accept `voucher_metrics_clean.csv`.
+Decided by the user (2026-10-29): `outputs/report/report_data.csv` is built by `data_cleaning/make_report_data.py` from `voucher_metrics_clean.csv`. It keeps `mean_voucher`, `total_cost` and `total_enroll` for the Q3 report of each fiscal year only (FY21Q3 to FY26Q3, 6 rows); the other quarters are dropped. The `quarter` column is renamed `year` and holds the fiscal year (`FY21` to `FY26`); each value is the Q3 value for that year. No values altered. `forecast.py` and `plots_drafts/plot_forecast.py` now read this file (column `year`) and no longer filter for Q3; the Q3 choice is unchanged from "Forecast method details" ("Annual value: each fiscal year's Q3 report") and now applies through this file. All forecast inputs from this file are Q3 values. They no longer accept `voucher_metrics_clean.csv`.
 
 Updates (2026-10-29, user): the file was renamed from `final_data_voucher.csv` to `final_data.csv` (now `outputs/report/report_data.csv`). Population columns `pop_total` and `pop_5_19` were added, joined from `az_pop_all_clean.csv` by calendar year (FYxx pairs with 20xx; FY26 uses the projected value). FY21 and FY22 are `N/A` because population data starts in 2023; nothing was imputed. Rows FY27 to FY46 were added (26 rows in total) with `N/A` for `mean_voucher`, `total_cost` and `total_enroll`. `pop_total` was added because the forecast needs it and `forecast.py` now reads only `report_data.csv` (usage: `forecast FINAL_DATA OUT_CSV [total|5_19]`); it no longer reads `az_pop_all_clean.csv`. Forecast results are unchanged.
 
@@ -226,9 +228,12 @@ Decided by the user (2026-10-29): universal expansion began in Q1 2023 (FY23Q1).
 
 Decided by the user (2026-11-01):
 
-- `outputs/final/` renamed to `outputs/report/`. `final_data.csv` renamed to `report_data.csv` and moved into it (built by `make_report_data.py`, renamed from `make_final_data.py`); `forecast_final.csv` renamed to `forecast.csv`.
+- `outputs/final/` renamed to `outputs/report/`. `final_data.csv` renamed to `report_data.csv` and moved into it (built by `make_report_data.py`, renamed from `make_final_data.py`); `forecast_final.csv` renamed to `forecast.csv`. The draft forecast CSV is `outputs/draft/forecast/csv/forecast_draft.csv`.
 - Report figures in `outputs/report/`: `enrollment_actual.png` (FY21-FY26 Q3 actuals), `forecast_enrollment_report.png` and `forecast_cost_table.png` (standalone panels of the slide, with report titles and a sources line), `forecast_slide_report.png` (slide with the cost tables).
-- Report figure scripts moved to `src/voucher_growth_model/plots_report/` and made self-contained (fonts moved in).
+- Earlier final graphs (`forecast_cost_final`, `forecast_cost_scenarios_final`, `forecast_enrollment_final`, `forecast_table`, first slide) moved to `outputs/draft/forecast/`.
+- Report figure scripts moved to `src/voucher_growth_model/plots_report/` and made self-contained (fonts and `plot_forecast_cost.py` moved in). Draft scripts folder renamed `plots/` to `plots_drafts/`.
+- `outputs/draft/` is git-ignored and removed from the git index; files remain local. `plots_drafts/` was git-ignored then, and is tracked as of 2026-11-01.
+- Report text: `docs/report_outline.md` (skeleton) and `docs/report_draft.md` (draft).
 
 ## Replication docs (2026-11-01)
 
@@ -255,6 +260,6 @@ Requested by the user (2026-11-01): `forecast_enrollment_report.png` had too lit
 
 Decided by the user (2026-11-01): `plot_forecast_slide.py --panels` and the standalone scripts both wrote `forecast_enrollment_report.png` and `forecast_cost_table.png`, with different titles and spacing, so whichever ran last set the report figures. The `--panels` option was removed. The standalone scripts (`plot_forecast_enrollment.py`, `plot_forecast_cost_table.py`) now produce these two files, including the headline enrollment title and the new bottom margins. The slide itself is unchanged.
 
-## Bar-chart cost panel removed (2026-11-01)
+## Bar-chart cost panel moved to drafts (2026-11-01)
 
-Decided by the user (2026-11-01): `plot_forecast_cost.py` (cost bar chart) fed no report figure, so it was removed from `plots_report/`. `plot_forecast_slide.py` imported it for the non-table variant and for its scenario list; the slide now always uses the cost table (the `--table` flag was removed) and takes its headline cost range from every FY46 cell of that table.
+Decided by the user (2026-11-01): `plot_forecast_cost.py` (cost bar chart) fed no report figure, so it moved from `plots_report/` to `plots_drafts/`. `plot_forecast_slide.py` imported it for the non-table variant and for its scenario list; the slide now always uses the cost table (the `--table` flag was removed) and takes its headline cost range from every FY46 cell of that table.
