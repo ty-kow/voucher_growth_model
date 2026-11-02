@@ -1,6 +1,6 @@
 # Voucher Growth Model
 
-Forecasts enrollment and program cost for Arizona's Empowerment Scholarship Account (ESA) voucher program from quarterly state reports. Enrollment drivers feed a cost projection. The forecast method is set (logistic take-up scenarios on the population aged 5-19); the current stage is the written report (`docs/report_draft.md`, figures in `outputs/report/`).
+Forecasts enrollment and program cost for Arizona's Empowerment Scholarship Account (ESA) voucher program from quarterly state reports. Enrollment drivers feed a cost projection. The forecast method is logistic take-up scenarios on the population aged 5-19 (see `docs/decisions.md`). Generated figures are written to `outputs/report/`.
 
 ## Data
 
@@ -58,18 +58,24 @@ uv run python -m voucher_growth_model.plots_report.plot_forecast_cost_table outp
 ## Layout
 
 ```
-data/raw/voucher_reports/                    source PDFs (tracked)
-data/raw/population/                         OEO population workbooks (tracked)
-data/processed/extracted/                    extractor output (tracked)
-data/processed/clean/                        cleaned CSVs (tracked)
-outputs/report/                              report data, forecast and figures (tracked)
-outputs/draft/                               exploratory graphs and forecasts (git-ignored)
+data/raw/voucher_reports/                    source PDFs
+data/raw/population/                         OEO population workbooks
+data/processed/                              generated: extracted/ and clean/ CSVs (git-ignored)
+outputs/                                     generated: report data, forecast, figures (git-ignored)
+src/voucher_growth_model/run_all.py          rebuilds all generated files from data/raw/
 src/voucher_growth_model/data_cleaning/      extract, clean, and merge scripts
 src/voucher_growth_model/forecast.py         forecast
 src/voucher_growth_model/plots_report/       report figure scripts (fonts/ holds bundled Montserrat)
-src/voucher_growth_model/plots_drafts/       draft graph scripts (git-ignored)
-docs/                                        decisions.md, research_log.md, data_dictionary.md (report_outline.md, report_draft.md git-ignored)
+docs/                                        decisions.md, research_log.md, data_dictionary.md
 tests/                                       pytest tests
+```
+
+Local-only, git-ignored: `src/voucher_growth_model/plots_drafts/` and `docs/report_*.md`.
+
+## Tests
+
+```
+uv run pytest
 ```
 
 ## Methodology
