@@ -263,3 +263,12 @@ Decided by the user (2026-11-01): `plot_forecast_slide.py --panels` and the stan
 ## Bar-chart cost panel moved to drafts (2026-11-01)
 
 Decided by the user (2026-11-01): `plot_forecast_cost.py` (cost bar chart) fed no report figure, so it moved from `plots_report/` to `plots_drafts/`. `plot_forecast_slide.py` imported it for the non-table variant and for its scenario list; the slide now always uses the cost table (the `--table` flag was removed) and takes its headline cost range from every FY46 cell of that table.
+
+## Forecast checks (2026-11-01)
+
+Approved by the user (2026-11-01, report review cards A1 and A2): two checks added in `checks.py`, run by `run_all` after `forecast`. `forecast.py` and `forecast.csv` are unchanged.
+
+- Hold-out (`outputs/report/holdout.csv`): r fitted on FY23-FY25 take-up (r = 0.276), anchored at FY25 take-up, projected one year to FY26 using the FY26 (projected) population. Predicted FY26 enrollment against the actual 102,891: 9.9% = 91,721 (-10.9%); 20% = 99,933 (-2.9%); 30% = 102,944 (+0.1%); 40% = 104,519 (+1.6%). The FY26 population is the projection, so the 2025/2026 series difference also lowers every prediction.
+- Population sensitivity (`outputs/report/forecast_pop_sensitivity.csv`): treats the 5.1% drop in `pop_5_19` from the 2025 estimate to the 2026 projection as a difference between series, not a real decline. Every projected year (FY26-FY46) is scaled by pop(2025) / pop(2026) = 1.054, then the forecast is rerun unchanged. FY26 take-up 7.10% (was 7.49%); r = 0.230 (was 0.246); FY46 enrollment 142k / 282k / 418k / 549k (was 135k / 269k / 400k / 529k); FY46 real cost $1.54-10.76 billion (was $1.46-10.35 billion). Scaled population is used only in this check; no clean file or `report_data.csv` value changed.
+
+Rejected by the user (card A3): rerunning the 9.9% scenario with its fitted r (0.555). The report discloses the shared r instead.

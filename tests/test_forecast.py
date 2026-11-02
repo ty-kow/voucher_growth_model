@@ -3,6 +3,7 @@ import math
 import numpy as np
 import pytest
 
+from voucher_growth_model.checks import holdout, pop_sensitivity
 from voucher_growth_model.forecast import forecast, takeup_path
 
 
@@ -48,3 +49,24 @@ def test_forecast_grid(tmp_path):
     assert fy27.is_monotonic_increasing and fy27.nunique() == 4
     hist = df[(df.fy == "FY27") & (df.voucher_scenario == "hist")].mean_voucher.iloc[0]
     assert hist == pytest.approx(10000 * (10000 / 9000) ** 0.5)
+
+
+def test_holdout_fits_fy23_fy25(tmp_path):
+    v = report_data(tmp_path, pop_5_19=1_600_000)
+    df = holdout(v, tmp_path / "holdout.csv")
+    r = np.polyfit([0, 1, 2], np.log([50000, 70000, 88000]), 1)[0]
+    assert df.r_fit.tolist() == pytest.approx([r] * 4)
+    k20 = df[df.takeup_scenario == "k20"].iloc[0]
+    assert k20.pred_enroll == pytest.approx(1_600_000 * takeup_path(0.055, 0.20, r, 1))
+    assert k20.error_pct == pytest.approx((k20.pred_enroll / 100000 - 1) * 100)
+
+
+def test_pop_sensitivity_scales_projection(tmp_path):
+    v = report_data(tmp_path, pop_5_19=1_600_000)
+    text = v.read_text().replace("FY26,10000,N/A,100000,1600000", "FY26,10000,N/A,100000,1500000")
+    v.write_text(text)
+    df = pop_sensitivity(v, tmp_path / "sens.csv")
+    # FY26 population (and every year after) scaled by 1.6M / 1.5M
+    assert df[df.fy == "FY26"]["pop"].iloc[0] == pytest.approx(1_600_000)
+    assert df[df.fy == "FY27"]["pop"].iloc[0] == pytest.approx(1_600_000 * 1.6 / 1.5)
+    assert df[df.fy == "FY26"].enroll.tolist() == pytest.approx([100000] * 8)

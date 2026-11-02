@@ -46,6 +46,12 @@ Forecast (FY26-FY46 enrollment and cost, population aged 5-19):
 uv run python -m voucher_growth_model.forecast outputs/report/report_data.csv outputs/report/forecast.csv
 ```
 
+Forecast checks (FY26 hold-out and population sensitivity):
+
+```
+uv run python -m voucher_growth_model.checks outputs/report/report_data.csv outputs/report/holdout.csv outputs/report/forecast_pop_sensitivity.csv
+```
+
 Report figures (run from the repo root; write to `outputs/report/`):
 
 ```
@@ -65,6 +71,7 @@ outputs/                                     generated: report data, forecast, f
 src/voucher_growth_model/run_all.py          rebuilds all generated files from data/raw/
 src/voucher_growth_model/data_cleaning/      extract, clean, and merge scripts
 src/voucher_growth_model/forecast.py         forecast
+src/voucher_growth_model/checks.py           forecast hold-out and population sensitivity
 src/voucher_growth_model/plots_report/       report figure scripts (fonts/ holds bundled Montserrat)
 docs/                                        decisions.md, research_log.md, data_dictionary.md
 tests/                                       pytest tests

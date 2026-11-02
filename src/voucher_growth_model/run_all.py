@@ -24,6 +24,7 @@ STEPS = [
      f"{CLEAN}/az_pop_all_clean.csv"],
     ["data_cleaning.make_report_data"],
     ["forecast", f"{REP}/report_data.csv", f"{REP}/forecast.csv"],
+    ["checks", f"{REP}/report_data.csv", f"{REP}/holdout.csv", f"{REP}/forecast_pop_sensitivity.csv"],
     ["plots_report.plot_forecast_slide", f"{REP}/report_data.csv", f"{REP}/forecast.csv",
      f"{REP}/forecast_slide_report.png"],
     ["plots_report.plot_enrollment_actual", f"{REP}/report_data.csv", f"{REP}/enrollment_actual.png"],
