@@ -49,7 +49,7 @@ uv run python -m voucher_growth_model.forecast outputs/report/report_data.csv ou
 Forecast checks (FY26 hold-out and population sensitivity):
 
 ```
-uv run python -m voucher_growth_model.checks outputs/report/report_data.csv outputs/report/holdout.csv outputs/report/forecast_pop_sensitivity.csv
+uv run python -m voucher_growth_model.checks outputs/report/report_data.csv outputs/report/holdout.csv outputs/report/forecast_pop_sensitivity.csv outputs/report/forecast_r_sensitivity.csv
 ```
 
 Report figures (run from the repo root; write to `outputs/report/`):

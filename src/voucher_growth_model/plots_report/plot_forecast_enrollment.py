@@ -36,7 +36,7 @@ NOTES = ("Notes: Actual enrollment is the Q3 count in each fiscal year. Populati
          "it was {y0:.2%} in FY26. FY26 take-up uses the projected 2026 population, which is about 5% "
          "below the 2025 figure and comes from a different source; this raises FY26 take-up and the fitted rate. "
          "All four forecasts use the same logistic rate, so growth starts slower the closer FY26 take-up is to the "
-         "ceiling. The 9.9% ceiling is the logistic best fit to FY23-FY26 take-up.")
+         "ceiling. The 9.9% ceiling comes from a logistic fit to FY23-FY26 take-up.")
 NOTES_WRAP = 148  # characters per notes line
 NOTES_LINE_HEIGHT = 0.0207  # figure fraction per 8 pt line
 NOTES_CLEARANCE = 0.45  # inches from the plot area's bottom edge to the top of the notes, past the tick labels

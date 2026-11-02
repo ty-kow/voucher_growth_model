@@ -35,7 +35,8 @@ def takeup_path(y0, ceiling, r, t):
     return ceiling / (1 + (ceiling / y0 - 1) * math.exp(-r * t))
 
 
-def forecast(final_path, out_path, base="5_19") -> pd.DataFrame:
+def forecast(final_path, out_path, base="5_19", r=None) -> pd.DataFrame:
+    """r overrides the fitted approach rate (used by the sensitivity checks in checks.py)."""
     cfg = BASES[base]
     v = pd.read_csv(final_path)
     v["year"] = 2000 + v["year"].str[2:4].astype(int)
@@ -46,7 +47,8 @@ def forecast(final_path, out_path, base="5_19") -> pd.DataFrame:
     y0 = takeup[BASE_FY]
     # Continuous growth rate: slope of log take-up on year over FY23-FY26 (uses every year in the window)
     window = takeup.loc[GROWTH_START_FY:BASE_FY]
-    r = np.polyfit(window.index, np.log(window), 1)[0]
+    if r is None:
+        r = np.polyfit(window.index, np.log(window), 1)[0]
     m0 = v.loc[BASE_FY, "mean_voucher"]
     hist = (m0 / v.loc[BASE_VOUCHER_FY, "mean_voucher"]) ** (1 / (BASE_FY - BASE_VOUCHER_FY)) - 1
     rates = {"infl2": 0.02, "hist": hist}

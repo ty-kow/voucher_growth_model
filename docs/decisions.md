@@ -272,3 +272,14 @@ Approved by the user (2026-11-01, report review cards A1 and A2): two checks add
 - Population sensitivity (`outputs/report/forecast_pop_sensitivity.csv`): treats the 5.1% drop in `pop_5_19` from the 2025 estimate to the 2026 projection as a difference between series, not a real decline. Every projected year (FY26-FY46) is scaled by pop(2025) / pop(2026) = 1.054, then the forecast is rerun unchanged. FY26 take-up 7.10% (was 7.49%); r = 0.230 (was 0.246); FY46 enrollment 142k / 282k / 418k / 549k (was 135k / 269k / 400k / 529k); FY46 real cost $1.54-10.76 billion (was $1.46-10.35 billion). Scaled population is used only in this check; no clean file or `report_data.csv` value changed.
 
 Rejected by the user (card A3): rerunning the 9.9% scenario with its fitted r (0.555). The report discloses the shared r instead.
+
+Update (2026-11-01, user, final report check): `holdout.csv` gains `pred_enroll_pop_adj` and `error_pct_pop_adj`, the same one-year prediction multiplied by the FY25 (2025 estimate) population instead of the FY26 projection, which removes the series difference. These back the report's hold-out sentence ("9.9% still 6% low, 20% within 3%"), which had been computed by hand. Existing columns unchanged.
+
+## Approach-rate sensitivity and report revisions round 5 (2026-11-01)
+
+Approved by the user (2026-11-01, ESA Revisions Round 5, card V10): `checks.py` gains `r_sensitivity`, which reruns the forecast with three alternative approach rates and writes `outputs/report/forecast_r_sensitivity.csv` (forecast columns plus `r_case`). `forecast()` takes an optional `r` override; with none it fits r as before, so `forecast.csv` is unchanged. `checks` now takes a fourth argument; `run_all`, README and CLAUDE.md updated.
+- `fit_fy24_fy26`: slope of log take-up on year over FY24-FY26, dropping the launch year (eligibility began about five months before the FY23Q3 report). r = 0.187; real cost FY36 $1.32-4.52B, FY46 $1.45-9.69B.
+- `step_min` / `step_max`: lowest and highest single-year growth of log take-up over FY23-FY26. r = 0.161 (FY36 $1.30-4.03B, FY46 $1.44-9.11B) and r = 0.391 (FY36 $1.38-6.92B, FY46 $1.46-10.66B).
+- Finding: r mainly shifts timing; FY46 moves little, the FY36 upper end moves from $4.0B to $6.9B.
+
+Same round, other changes: the 9.9% scenario is described as the "fitted ceiling" rather than "best fit", because it uses the shared r (0.246) rather than the fitted 0.555 (card V05). The Figure 2 notes in `plot_forecast_enrollment.py` were reworded to match and the figure regenerated; values unchanged. The report's JLBC comparison (card V11) uses the FY 2026 Baseline summary (https://www.azjlbc.gov/26baseline/s2.pdf): 97,905 ESA students and $1.0 billion in ESA awards assumed for FY 2026; the baseline gives no later-year ESA projection.

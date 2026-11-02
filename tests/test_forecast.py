@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pytest
 
-from voucher_growth_model.checks import holdout, pop_sensitivity
+from voucher_growth_model.checks import holdout, pop_sensitivity, r_sensitivity
 from voucher_growth_model.forecast import forecast, takeup_path
 
 
@@ -59,6 +59,28 @@ def test_holdout_fits_fy23_fy25(tmp_path):
     k20 = df[df.takeup_scenario == "k20"].iloc[0]
     assert k20.pred_enroll == pytest.approx(1_600_000 * takeup_path(0.055, 0.20, r, 1))
     assert k20.error_pct == pytest.approx((k20.pred_enroll / 100000 - 1) * 100)
+
+
+def test_holdout_pop_adj_uses_fy25_population(tmp_path):
+    v = report_data(tmp_path, pop_5_19=1_600_000)
+    text = v.read_text().replace("FY26,10000,N/A,100000,1600000", "FY26,10000,N/A,100000,1500000")
+    v.write_text(text)
+    df = holdout(v, tmp_path / "holdout.csv")
+    k20 = df[df.takeup_scenario == "k20"].iloc[0]
+    assert k20.pred_enroll_pop_adj == pytest.approx(k20.pred_enroll * 1.6 / 1.5)
+    assert k20.error_pct_pop_adj == pytest.approx((k20.pred_enroll_pop_adj / 100000 - 1) * 100)
+
+
+def test_r_sensitivity_cases(tmp_path):
+    v = report_data(tmp_path, pop_5_19=1_600_000)
+    df = r_sensitivity(v, tmp_path / "r_sens.csv")
+    r = df.groupby("r_case", sort=False).r.first()
+    assert list(r.index) == ["fit_fy24_fy26", "step_min", "step_max"]
+    assert r["fit_fy24_fy26"] == pytest.approx(math.log(100000 / 70000) / 2)  # 3 equally spaced points: endpoint slope
+    assert r["step_min"] == pytest.approx(math.log(100000 / 88000))
+    assert r["step_max"] == pytest.approx(math.log(70000 / 50000))
+    assert len(df) == 3 * 21 * 4 * 2
+    assert df[df.fy == "FY26"].enroll.tolist() == pytest.approx([100000] * 24)
 
 
 def test_pop_sensitivity_scales_projection(tmp_path):
