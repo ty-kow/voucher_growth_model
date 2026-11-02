@@ -60,18 +60,18 @@ Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns:
 - In practice more complicated. Students tend to leave the program before grade 9. This is a qualitative claim, not yet checked against data.
 
 **Naive program growth.**
-- 4.08% per quarter in total enrollment (FY24Q1-FY26Q4, n = 12). Source: log-linear trend with quarter effects (`plots_drafts/plot_enrollment_seasonal_model.py`, `outputs/draft/enrollment/enrollment_seasonal_model.png`); SE 0.0010 log points.
+- 4.08% per quarter in total enrollment (FY24Q1-FY26Q4, n = 12). Source: log-linear trend with quarter effects; SE 0.0010 log points.
 - Seasonal factors: Q1 0.999, Q2 1.019, Q3 1.022, Q4 0.961.
 - Caveat: 12 points, 5 parameters; each factor rests on three observations. Baseline for later models, not a forecast method.
 
 **Naive mean voucher growth.**
-- 1.1% per quarter (FY24Q1-FY26Q4, n = 12). Source: OLS linear trend (`plots_drafts/plot_mean_voucher_ols.py`, `outputs/draft/mean_voucher/mean_voucher_ols.png`): slope $115.52 per quarter (SE $7.27, R² = 0.962), about 1.1% of the series mean ($10,266).
+- 1.1% per quarter (FY24Q1-FY26Q4, n = 12). Source: OLS linear trend: slope $115.52 per quarter (SE $7.27, R² = 0.962), about 1.1% of the series mean ($10,266).
 - Caveat: 12 points. FY25+ values are implied averages (cost / enrollment), not reported (see Data cleaning, step 2). Baseline for later models, not a forecast method.
 
 **Mean voucher seasonality.**
 - Decision: no seasonal adjustment of `mean_voucher`.
 - Rationale: mean voucher is driven by the composition of enrolled students. Entry and exit at the start or end of the year show no pattern in who joins or leaves, so there is no mechanism for a seasonal effect.
-- Check: log-linear trend with quarter effects (FY24Q1-FY26Q4, n = 12; `plots_drafts/plot_mean_voucher_seasonal_model.py`, `outputs/draft/mean_voucher/mean_voucher_seasonal_model.png`) gives factors Q1 0.9998, Q2 1.0061, Q3 0.9990, Q4 0.9951, all within 0.6% of 1. Trend 1.15% per quarter (SE 0.0007 log points). Consistent with the rationale, though 12 points give little power.
+- Check: log-linear trend with quarter effects (FY24Q1-FY26Q4, n = 12) gives factors Q1 0.9998, Q2 1.0061, Q3 0.9990, Q4 0.9951, all within 0.6% of 1. Trend 1.15% per quarter (SE 0.0007 log points). Consistent with the rationale, though 12 points give little power.
 
 **Cost.**
 - Special needs cost is driven in large part by autism, which carries the highest award value.
@@ -89,7 +89,7 @@ Cleaned file: `data/processed/clean/voucher_metrics_clean.csv` (renamed columns:
 Full parameter choices are in `decisions.md` (sections "Forecast scope" to "School-age (5-19) population version").
 
 **Data prep.**
-- Reorganized `data/processed/` into `raw/` (since renamed `extracted/`) and `clean/`; added population cleaning scripts (`clean_population_proj.py`, `clean_population_real.py`) and `plots_drafts/plot_pop_proj.py`.
+- Reorganized `data/processed/` into `raw/` (since renamed `extracted/`) and `clean/`; added population cleaning scripts (`clean_population_proj.py`, `clean_population_real.py`).
 - Merged real (2023-2025) and projected (2026-2046) population into `data/processed/clean/az_pop_all_clean.csv` (`merge_population.py`), columns `pop_total`, `pop_5_19`, `source`. Caveat: sources differ, so a level shift at 2025/2026 is possible.
 
 **Method.** `src/voucher_growth_model/forecast.py`, annual FY26-FY46 (the FY26 row reproduces actuals).
@@ -136,7 +136,6 @@ Question: which grade's enrollment trend matches total enrollment (`total_enroll
 **Headline results** (`outputs/report/forecast.csv`). FY46 enrollment 134,648 to 528,533. FY46 real cost $1.5B to $10.4B; FY36 $1.3B to $5.5B. The take-up ceiling drives more of the spread than voucher growth.
 
 **Report materials.**
-- Text: `docs/report_outline.md` (skeleton), `docs/report_draft.md` (draft, ~1,500 words).
 - Figures in `outputs/report/`: `enrollment_actual.png`, `forecast_enrollment_report.png`, `forecast_cost_table.png`, `forecast_slide_report.png`; scripts in `src/voucher_growth_model/plots_report/`.
 
 **Open items.**

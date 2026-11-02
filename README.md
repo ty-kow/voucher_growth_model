@@ -70,7 +70,6 @@ docs/                                        decisions.md, research_log.md, data
 tests/                                       pytest tests
 ```
 
-Local-only, git-ignored: `src/voucher_growth_model/plots_drafts/` and `docs/report_*.md`.
 
 ## Tests
 
