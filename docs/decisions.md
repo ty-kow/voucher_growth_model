@@ -283,3 +283,7 @@ Approved by the user (2026-11-01, ESA Revisions Round 5, card V10): `checks.py` 
 - Finding: r mainly shifts timing; FY46 moves little, the FY36 upper end moves from $4.0B to $6.9B.
 
 Same round, other changes: the 9.9% scenario is described as the "fitted ceiling" rather than "best fit", because it uses the shared r (0.246) rather than the fitted 0.555 (card V05). The Figure 2 notes in `plot_forecast_enrollment.py` were reworded to match and the figure regenerated; values unchanged. The report's JLBC comparison (card V11) uses the FY 2026 Baseline summary (https://www.azjlbc.gov/26baseline/s2.pdf): 97,905 ESA students and $1.0 billion in ESA awards assumed for FY 2026; the baseline gives no later-year ESA projection.
+
+## Cost table report figure: one combined table (2026-11-01)
+
+Requested by the user (2026-11-01): `forecast_cost_table.png` filled a full PDF page (6.5x8 in) and printed larger than Figure 2. The report figure now comes from `plot_cost_table_report` in `plot_forecast_cost_table.py`: one table with 2036 and 2046 side by side (rows are take-up ceilings, two voucher growth columns per year), 9 in wide with the enrollment figure's font sizes, and the FY26 actual cost moved into the subtitle. New size at 300 dpi: about 2700x1250 (was 1950x2336). `plot_forecast_cost_table` (stacked tables) still draws the slide panel, which is unchanged. Values are unchanged.

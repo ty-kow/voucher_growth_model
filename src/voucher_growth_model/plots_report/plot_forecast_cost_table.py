@@ -1,4 +1,7 @@
-"""Tables of FY36 and FY46 forecast real cost (FY26 dollars), one per year: rows are take-up ceilings, columns are voucher growth scenarios.
+"""Tables of FY36 and FY46 forecast real cost (FY26 dollars): rows are take-up ceilings, columns are voucher growth scenarios.
+
+plot_forecast_cost_table draws the slide panel (one table per year, stacked); plot_cost_table_report draws the report
+figure (one table, years side by side).
 
 Usage (from the repo root):
     uv run python -m voucher_growth_model.plots_report.plot_forecast_cost_table <forecast_csv> <out_png>
@@ -10,11 +13,12 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patches import Rectangle
 import pandas as pd
 
 from voucher_growth_model.plots_report.plot_forecast_enrollment import (
-    FIG_HEIGHT, NOTES_CLEARANCE, PANEL_TITLE_FONTSIZE, PANEL_TITLE_TOP, SAVE_DPI, SCENARIO_COLORS_5_19, SOURCE,
-    SOURCE_GAP, SUBTITLE_LINE_HEIGHT, BOTTOM_MARGIN, bottom_bbox,
+    FIG_HEIGHT, NOTES_CLEARANCE, NOTES_WRAP, PANEL_TITLE_FONTSIZE, PANEL_TITLE_TOP, SAVE_DPI, SCENARIO_COLORS_5_19,
+    SOURCE, SOURCE_GAP, SUBTITLE_LINE_HEIGHT, BOTTOM_MARGIN, bottom_bbox,
 )
 
 YEARS = ["FY36", "FY46"]
@@ -127,9 +131,73 @@ def plot_forecast_cost_table(forecast_csv: Path, out_path: Path, figsize: tuple[
     fig.savefig(out_path, dpi=SAVE_DPI, bbox_inches=bottom_bbox(fig, bottom_margin))
 
 
+def plot_cost_table_report(forecast_csv: Path, out_path: Path) -> None:
+    """Report figure: one table with 2036 and 2046 side by side, the width and font sizes of the enrollment figure so
+    both print at the same scale. Positions are in inches from the figure's top-left corner."""
+    f = pd.read_csv(forecast_csv)
+    cost = f.set_index(["fy", "takeup_scenario", "voucher_scenario"])["cost_real_fy26"] / 1e9
+    m = f[(f["voucher_scenario"] == "hist") & (f["takeup_scenario"] == ROWS[0][0])].set_index("fy")["mean_voucher"]
+    hist_rate = m["FY27"] / m["FY26"] - 1
+    actual = cost[("FY26", ROWS[0][0], "infl2")]
+    width, height = 9, 4.6
+    cols = [(fy, v) for fy in YEARS for v in ("infl2", "hist")]
+    values = [cost[(fy, k, v)] for fy, v in cols for k, _ in ROWS]
+    lo, hi = min(values), max(values)
+
+    fig = plt.figure(figsize=(width, height), dpi=SAVE_DPI)
+    ax = fig.add_axes((0, 0, 1, 1))
+    ax.set_xlim(0, width)
+    ax.set_ylim(height, 0)  # y counts down from the top edge
+    ax.axis("off")
+    fig.text(0.5, 1 - 0.09 / height, "ESA Voucher Cost Forecasts", ha="center", va="top", fontsize=14,
+             fontweight="bold")
+    fig.text(0.5, 1 - 0.5 / height, f"{SUBTITLE} FY26 actual cost: \\${actual:,.1f}B.", ha="center", va="top",
+             fontsize=10)
+
+    # Row labels sit right-aligned against the table; label column and table together are centred on the figure
+    labels = [ax.text(0, 0, label, ha="right", va="center", fontsize=10, fontweight="bold",
+                      color=SCENARIO_COLORS_5_19[k]) for k, label in ROWS]
+    fig.canvas.draw()
+    label_w = max(t.get_window_extent().width for t in labels) / fig.dpi
+    col_w, label_gap = 1.3, 0.15
+    x0 = (width - label_w - label_gap - len(cols) * col_w) / 2 + label_w + label_gap
+    year_top, year_h, head_h, row_h = 0.85, 0.3, 0.45, 0.34
+
+    def cell(x, y, w, h, text, face, **kw):
+        ax.add_patch(Rectangle((x, y), w, h, facecolor=face, edgecolor="#cccccc", linewidth=0.8))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", **kw)
+
+    for i, fy in enumerate(YEARS):  # year headers span their two growth columns
+        cell(x0 + 2 * i * col_w, year_top, 2 * col_w, year_h, f"20{fy[2:]}", "#e6e6e6", fontsize=11,
+             fontweight="bold")
+    head_top = year_top + year_h
+    rows_top = head_top + head_h
+    for j, (fy, v) in enumerate(cols):
+        x = x0 + j * col_w
+        rate = 0.02 if v == "infl2" else hist_rate
+        cell(x, head_top, col_w, head_h, f"{rate:.0%} Voucher\nGrowth" if v == "infl2" else f"{rate:.1%} Voucher\nGrowth",
+             "#f2f2f2", fontsize=9, fontweight="bold")
+        for r, (k, _) in enumerate(ROWS):  # one colour scale across both years, so shades compare
+            c = cost[(fy, k, v)]
+            cell(x, rows_top + r * row_h, col_w, row_h, f"\\${c:,.1f}B", CMAP((c - lo) / (hi - lo)), fontsize=11)
+    for r, t in enumerate(labels):
+        t.set_position((x0 - label_gap, rows_top + (r + 0.5) * row_h))
+    table_bottom = rows_top + len(ROWS) * row_h
+    ax.plot([x0 + 2 * col_w] * 2, [year_top, table_bottom], color="#666666", linewidth=1.5)  # divides the years
+
+    notes = fig.text(0, 1 - (table_bottom + TABLE_NOTES_GAP) / height,
+                     textwrap.fill(NOTES.format(r=hist_rate), NOTES_WRAP), ha="left", va="top", fontsize=8)
+    fig.canvas.draw()
+    notes_bottom = notes.get_window_extent().y0 / fig.bbox.height
+    source = fig.text(0, notes_bottom - SOURCE_GAP / height, textwrap.fill(SOURCE, NOTES_WRAP), ha="left", va="top",
+                      fontsize=8)
+    fig.canvas.draw()
+    widest = max(t.get_window_extent().width for t in (notes, source))  # shared left edge, widest block centred
+    for t in (notes, source):
+        t.set_x((fig.bbox.width - widest) / 2 / fig.bbox.width)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, dpi=SAVE_DPI, bbox_inches=bottom_bbox(fig, BOTTOM_MARGIN))
+
+
 if __name__ == "__main__":
-    # Report figure: own title and sources line, taller than the slide panel so the notes fit
-    plot_forecast_cost_table(Path(sys.argv[1]), Path(sys.argv[2]), figsize=(6.5, 8.05),
-                             panel_title="ESA Voucher Cost Forecasts", subtitle_top=0.5, subtitle_fontsize=12,
-                             subtitle_wrap=50, center_subtitle=False, axes_y=(0.2, 0.8), show_source=True,
-                             bottom_margin=BOTTOM_MARGIN)
+    plot_cost_table_report(Path(sys.argv[1]), Path(sys.argv[2]))
