@@ -5,11 +5,11 @@ Forecasts enrollment and program cost for Arizona's Empowerment Scholarship Acco
 ## Data
 
 Quarterly ESA reports, FY21Q2-FY26Q4, in `data/raw/voucher_reports/`.
-Source: Arizona Department of Education (ADE), ESA Program quarterly reports, published at [azed.gov](https://www.azed.gov). Earlier reports (FY21-FY24) were addressed to the State Board of Education; later ones are "Executive & Legislative" reports. TODO: add retrieval date.
+Source: Arizona Department of Education (ADE), ESA Program quarterly reports, published at [azed.gov](https://www.azed.gov). Earlier reports (FY21-FY24) were addressed to the State Board of Education; later ones are "Executive & Legislative" reports. Retrieved 2026-10-26.
 
 FY24 quarters appear in two variants (`SBE` and non-`SBE`); the extractor merges them.
 
-Population: Arizona Office of Economic Opportunity (OEO), [population projections](https://oeo.az.gov/population/projections), 2025-2060 Medium Series, plus 2023-2025 estimates, in `data/raw/population/`.
+Population: Arizona Office of Economic Opportunity (OEO), [population projections](https://oeo.az.gov/population/projections), 2025-2060 Medium Series, plus 2023-2025 estimates, in `data/raw/population/`. Retrieved 2026-10-28.
 
 ## Usage
 
