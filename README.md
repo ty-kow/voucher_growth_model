@@ -68,7 +68,7 @@ src/voucher_growth_model/data_cleaning/      extract, clean, and merge scripts
 src/voucher_growth_model/forecast.py         forecast
 src/voucher_growth_model/plots_report/       report figure scripts (fonts/ holds bundled Montserrat)
 src/voucher_growth_model/plots_drafts/       draft graph scripts (git-ignored)
-docs/                                        decisions.md, research_log.md, data_dictionary.md, report_outline.md, report_draft.md
+docs/                                        decisions.md, research_log.md, data_dictionary.md (report_outline.md, report_draft.md git-ignored)
 tests/                                       pytest tests
 ```
 

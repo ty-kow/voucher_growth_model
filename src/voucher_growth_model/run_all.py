@@ -33,6 +33,8 @@ STEPS = [
 ]
 
 if __name__ == "__main__":
+    for d in (EXT, CLEAN, REP):
+        Path(d).mkdir(parents=True, exist_ok=True)
     for module, *args in STEPS:
         print(f"> {module}", flush=True)
         subprocess.run([sys.executable, "-m", f"voucher_growth_model.{module}", *args], check=True)
