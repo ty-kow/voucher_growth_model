@@ -9,7 +9,6 @@
 data/processed/
 outputs/
 
-# Drafts and report writing (local only)
+# Report writing (local only)
 docs/report_outline.md
 docs/report_draft.md
-src/voucher_growth_model/plots_drafts/
